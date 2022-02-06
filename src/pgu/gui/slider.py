@@ -54,7 +54,10 @@ class _slider(widget.Widget):
             self.repaint()
         elif e.type == MOUSEMOTION:
             if 1 in e.buttons and self.container.myfocus is self:
-                if self.grab != None:
+                if self.grab is None:
+                    x,y,adj = e.pos[0],e.pos[1],1
+
+                else:
                     rel = e.pos[0]-self.grab[0],e.pos[1]-self.grab[1]
                     if self.orient == _SLIDER_HORIZONTAL:
                         d = (r.w - self.size)
@@ -62,9 +65,6 @@ class _slider(widget.Widget):
                     else:
                         d = (r.h - self.size)
                         if d != 0: self.value = self.grab_value + ((self.max-self.min) * rel[1] / d)
-                else:
-                    x,y,adj = e.pos[0],e.pos[1],1
-                    
         elif e.type is KEYDOWN:
             if self.orient == _SLIDER_HORIZONTAL and e.key == K_LEFT:
                 self.value -= self.step
@@ -86,11 +86,11 @@ class _slider(widget.Widget):
             else:
                 d = self.size/2 - (r.h/(self.max-self.min+1))/2
                 self.value = (y-d) * (self.max-self.min) / (r.h-self.size+1) + self.min
-                
+
         self.pcls = ""
         if self.container.myhover is self: self.pcls = "hover"
         if (self.container.myfocus is self and 1 in pygame.mouse.get_pressed()): self.pcls = "down"
-        
+
         return used
 
     # TODO - replace this with property functions and setters
@@ -109,8 +109,8 @@ class _slider(widget.Widget):
             sz = max(sz,min(self.style.width,self.style.height))
             self.__dict__['size'] = sz
             #self.size = sz
-        if hasattr(self,'max') and hasattr(self,'min'):
-            if self.max < self.min: self.max = self.min
+        if hasattr(self, 'max') and hasattr(self, 'min') and self.max < self.min:
+            self.max = self.min
 
 #    @property
 #    def value(self):
@@ -166,24 +166,33 @@ class HScrollBar(table.Table):
 
     def __init__(self,value,min,max,size,step=1,**params):
         params.setdefault('cls','hscrollbar')
-        
+
         table.Table.__init__(self,**params)
 
         # Check that these styles are defined
         self.style.check("minus")
         self.style.check("plus")
 
-        self.slider = _slider(value,_SLIDER_HORIZONTAL,min,max,size,step=step,cls=self.cls+'.slider')
+        self.slider = _slider(
+            value,
+            _SLIDER_HORIZONTAL,
+            min,
+            max,
+            size,
+            step=step,
+            cls=f'{self.cls}.slider',
+        )
+
         self.minus = basic.Image(self.style.minus)
         self.minus.connect(MOUSEBUTTONDOWN,self._click,-1)
         self.slider.connect(CHANGE,self.send,CHANGE)
-        
+
         self.minus2 = basic.Image(self.style.minus)
         self.minus2.connect(MOUSEBUTTONDOWN,self._click,-1)
-        
+
         self.plus = basic.Image(self.style.plus)
         self.plus.connect(MOUSEBUTTONDOWN,self._click,1)
-        
+
         self.size = size
         
     def _click(self,value):
@@ -268,7 +277,7 @@ class VScrollBar(table.Table):
 
     def __init__(self,value,min,max,size,step=1,**params):
         params.setdefault('cls','vscrollbar')
-        
+
         table.Table.__init__(self,**params)
 
         # Check that these styles are defined
@@ -277,16 +286,25 @@ class VScrollBar(table.Table):
 
         self.minus = basic.Image(self.style.minus)
         self.minus.connect(MOUSEBUTTONDOWN,self._click,-1)
-        
+
         self.minus2 = basic.Image(self.style.minus)
         self.minus2.connect(MOUSEBUTTONDOWN,self._click,-1)
-        
+
         self.plus = basic.Image(self.style.plus)
         self.plus.connect(MOUSEBUTTONDOWN,self._click,1)
-        
-        self.slider = _slider(value,_SLIDER_VERTICAL,min,max,size,step=step,cls=self.cls+'.slider')
+
+        self.slider = _slider(
+            value,
+            _SLIDER_VERTICAL,
+            min,
+            max,
+            size,
+            step=step,
+            cls=f'{self.cls}.slider',
+        )
+
         self.slider.connect(CHANGE,self.send,CHANGE)
-        
+
         self.size = size
         
     def _click(self,value):

@@ -28,15 +28,14 @@ class SoundEngine():
         self.soundList.append(self.loadFile(g.dataPath + "/music/1.ogg"))
 
         self.attackSounds.append(self.loadFile(g.dataPath + "/sounds/swing_1.ogg"))
-        self.attackSounds.append(self.loadFile(g.dataPath + "/sounds/swing_2.ogg"))
+        self.attackSounds.append(self.loadFile(f'{g.dataPath}/sounds/swing_2.ogg'))
         self.attackSounds.append(self.loadFile(g.dataPath + "/sounds/swing_3.ogg"))
 
         self.spellSounds.append(self.loadFile(g.dataPath + "/sounds/spell.ogg"))
         self.spellSounds.append(self.loadFile(g.dataPath + "/sounds/spell_subhp.ogg"))
 
     def loadFile(self, filename):
-        sound = pygame.mixer.Sound(filename)
-        return sound
+        return pygame.mixer.Sound(filename)
 
     def play(self, sound, loops=False, fade_in=False):
         if not self.musicMuted:

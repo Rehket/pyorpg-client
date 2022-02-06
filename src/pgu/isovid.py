@@ -20,25 +20,25 @@ class Isovid(Vid):
     
     def paint(self,screen):
         sw,sh = screen.get_width(),screen.get_height()
-        
+
         tlayer = self.tlayer
         blayer = self.blayer
         zlayer = self.zlayer
         w,h = len(tlayer[0]),len(tlayer)
-        
+
         iso_w,iso_h,iso_z,tile_w,tile_h,base_w,base_h = self.iso_w,self.iso_h,self.iso_z,self.tile_w,self.tile_h,self.base_w,self.base_h
-        
+
         base_h2 = base_h/2
         base_w2 = base_w/2
-        
+
         bot = tile_h/base_h2
         todo_max = sh/base_h2+bot
-        todo = [[] for y in xrange(0,todo_max)]
-        
+        todo = [[] for _ in xrange(0,todo_max)]
+
         self.view.w,self.view.h = sw,sh
         view = self.view
         adj = self.adj = pygame.Rect(-self.view.x,-self.view.y,0,0)
-        
+
         for s in self.sprites:
             self.sprite_calc_irect(s)
             x,y = self.iso_to_view((s.rect.centerx,s.rect.centery))
@@ -46,32 +46,32 @@ class Isovid(Vid):
             if v >= 0 and v < todo_max:
                 todo[v].append((s.image,s.irect))
             #else: print 'doesnt fit',v
-                
+
         w,h = len(tlayer[0]),len(tlayer)
         tiles = self.tiles
-        
+
         #""
-        if self.bounds == None:
+        if self.bounds is None:
             tmp,y1 = self.tile_to_view((0,0))
             x1,tmp = self.tile_to_view((0,h+1))
             tmp,y2 = self.tile_to_view((w+1,h+1))
             x2,tmp = self.tile_to_view((w+1,0))
             self.bounds = pygame.Rect(x1,y1,x2-x1,y2-y1)
         #""
-        
+
         if self.bounds != None: self.view.clamp_ip(self.bounds)
 
         ox,oy = self.screen_to_tile((0,0))
         sx,sy = self.iso_to_view((ox*iso_w,oy*iso_h))
         dx,dy = sx - self.view.x,sy - self.view.y
-        
+
         for i2 in xrange(-bot,self.view.h/base_h2+bot):
             tx,ty = ox + i2/2 + i2%2,oy + i2/2
             x,y = (i2%2)*base_w2 + dx,i2*base_h2 + dy
-            
+
             #to adjust for the -1 in i1
             x,tx,ty = x-base_w,tx-1,ty+1
-            for i1 in xrange(-1,self.view.w/base_w+2): #NOTE: not sure why +2
+            for _ in xrange(-1,self.view.w/base_w+2):
                 if ty >= 0 and ty < h and tx >= 0 and tx < w:
                     z = zlayer[ty][tx]*iso_z
                     if blayer != None:
@@ -85,7 +85,7 @@ class Isovid(Vid):
                         t = tiles[n]
                         if t != None and t.image != None:
                             screen.blit(t.image,(x-base_w2,y-(t.image_h-base_h)+z))
-            
+
                 tx += 1
                 ty -= 1
                 x += base_w
@@ -146,11 +146,11 @@ class Isovid(Vid):
         
     def resize(self,size,bg=0):
         Vid.resize(self,size,bg)
-        
+
         tlayer = self.tlayer
         w,h = len(tlayer[0]),len(tlayer)
-        
-        self.zlayer = [[0 for x in xrange(0,w)] for y in xrange(0,h)]
+
+        self.zlayer = [[0 for _ in xrange(0,w)] for _ in xrange(0,h)]
 
         
 

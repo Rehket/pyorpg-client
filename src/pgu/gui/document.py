@@ -56,22 +56,22 @@ class Document(container.Container):
     def resize(self,width=None,height=None):
         if self.style.width: width = self.style.width
         if self.style.height: height = self.style.height
-        
+
         for w in self.widgets:
             w.rect.w,w.rect.h = w.resize()
-            
+
             if (width != None and w.rect.w > width) or (height != None and w.rect.h > height):
                 w.rect.w,w.rect.h = w.resize(width,height)
-            
+
             dw = w._c_dw
             dw.rect = pygame.Rect(0,0,w.rect.w,w.rect.h)
-        
-        if width == None: width = 65535
+
+        if width is None: width = 65535
         self.layout.rect = pygame.Rect(0,0,width,0)
         self.layout.resize()
-        
+
         _max_w = 0
-        
+
         for w in self.widgets:
             #xt,xl,xb,xr = w.getspacing()
             dw = w._c_dw
@@ -79,7 +79,7 @@ class Document(container.Container):
             #w.resize()
             w.rect.x,w.rect.y = w.style.x,w.style.y
             _max_w = max(_max_w,w.rect.right)
-        
+
         #self.rect.w = _max_w #self.layout.rect.w
         #self.rect.h = self.layout.rect.h
         #print 'document',_max_w,self.layout.rect.h

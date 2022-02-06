@@ -11,8 +11,7 @@ def manhattan_dist(a,b):
 class node:
     def __init__(self, prev, pos, dest, dist):
         self.prev,self.pos,self.dest = prev,pos,dest
-        if self.prev == None: self.g = 0
-        else: self.g = self.prev.g + 1
+        self.g = 0 if self.prev is None else self.prev.g + 1
         self.h = dist(pos,dest)
         self.f = self.g+self.h
 
@@ -41,12 +40,10 @@ def astar(start,end,layer,dist=manhattan_dist):
     if layer[end[1]][end[0]]:
         return [] #end is blocked
 
-    opens = []
-    open = {}
     closed = {}
     cur = node(None, start, end, dist)
-    open[cur.pos] = cur
-    opens.append(cur)
+    open = {cur.pos: cur}
+    opens = [cur]
     while len(open):
         cur = opens.pop(0)
         if cur.pos not in open: continue
@@ -76,10 +73,10 @@ def astar(start,end,layer,dist=manhattan_dist):
                 if new.f < opens[mid].f: hi = mid
                 else: lo = mid + 1
             opens.insert(lo,new)
-    
+
     if cur.pos != end: 
         return []
-                    
+
     path = []
     while cur.prev != None:
         path.append(cur.pos)
@@ -98,17 +95,13 @@ def getline(a,b):
     """
            
     path = []
-    
+
     x1,y1 = a
     x2,y2 = b
     dx,dy = abs(x2-x1),abs(y2-y1)
 
-    if x2 >= x1: xi1,xi2 = 1,1
-    else: xi1,xi2 = -1,-1
-    
-    if y2 >= y1: yi1,yi2 = 1,1
-    else: yi1,yi2 = -1,-1
-    
+    xi1,xi2 = (1, 1) if x2 >= x1 else (-1, -1)
+    yi1,yi2 = (1, 1) if y2 >= y1 else (-1, -1)
     if dx >= dy:
         xi1,yi2 = 0,0
         d = dx
@@ -121,7 +114,7 @@ def getline(a,b):
         n = dy/2
         a = dx
         p = dy
-        
+
     x,y = x1,y1
     c = 0
     while c <= p:

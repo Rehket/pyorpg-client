@@ -46,7 +46,7 @@ class Engine:
         g.soundEngine = SoundEngine()
         g.soundEngine.loadSounds()
 
-        self.initConfig(g.dataPath + '/config.cfg')
+        self.initConfig(f'{g.dataPath}/config.cfg')
 
         self.setState(MENU_LOGIN)
 
@@ -134,15 +134,14 @@ class Engine:
 
                 # process movements
                 if self.walkTimer < self.clockTick:
-                    for i in range(0, len(g.playersOnMap)):
+                    for i in range(len(g.playersOnMap)):
                         if Player[g.playersOnMap[i]].moving > 0:
                             processMovement(g.playersOnMap[i])
 
                     #for i in range(g.npcHighIndex):
-                    for i in range(0, MAX_MAP_NPCS):
-                        if Map.npc[i] != None:
-                            if mapNPC[i].moving > 0:
-                                processNPCMovement(i)
+                    for i in range(MAX_MAP_NPCS):
+                        if Map.npc[i] != None and mapNPC[i].moving > 0:
+                            processNPCMovement(i)
 
                     self.walkTimer = self.clockTick + 30
 
@@ -150,7 +149,7 @@ class Engine:
 
             # flip graphics
             pygame.display.update()
-            #pygame.display.update(self.graphicsEngine.dirtyRects)
+                #pygame.display.update(self.graphicsEngine.dirtyRects)
 
         pygame.event.pump()
         for event in pygame.event.get():
@@ -199,10 +198,7 @@ class Engine:
         def pressed(key):
             keys = pygame.key.get_pressed()
 
-            if keys[key]:
-                return True
-            else:
-                return False
+            return bool(keys[key])
 
         if pressed(pygame.K_UP) or pressed(pygame.K_w):
             g.inpDIR_UP = True

@@ -49,11 +49,7 @@ def writewrap(s, font, rect, color, text, maxlines=None, wrapchar=False):
     done = False
     for sentence in txt.split("\n"):
         x = r.left
-        if wrapchar:
-            words = sentence
-        else:
-            words = sentence.split(" ")
-            
+        words = sentence if wrapchar else sentence.split(" ")
         for word in words:
             if (not wrapchar):
                 word += " "

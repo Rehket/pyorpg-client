@@ -73,9 +73,7 @@ class MapSelectorDialog(gui.Dialog):
         gui.Dialog.__init__(self, title, t)
 
     def setInput(self, value):
-        listValue = self.mapList.value
-
-        if listValue:
+        if listValue := self.mapList.value:
             self.inpField.value = str(listValue)
             self.close()
 
@@ -308,9 +306,7 @@ class propertiesControl(gui.Table):
         self.listCount += 1
 
     def removeNpc(self, arg):
-        item = self.npcList.value
-
-        if item:
+        if item := self.npcList.value:
             self.npcList.remove(item)
             self.npcList.resize()
             self.npcList.repaint()
@@ -551,10 +547,7 @@ class MapEditorContainer(gui.Container):
         Map.right = int(self.propertiesCtrl.value["inpMapRight"].value)
 
         # retrieve the npcs from the list
-        npcList = []
-        for item in self.propertiesCtrl.value['lstNpcs'].items:
-            npcList.append(item.value)
-
+        npcList = [item.value for item in self.propertiesCtrl.value['lstNpcs'].items]
         # add them to the map
         for i in range(MAX_MAP_NPCS):
             try:
@@ -677,8 +670,28 @@ class MapEditorGUI():
         # scroll buttons
         # - scroll buttons (place them near self.tileSurfaceRect)
         btnScrollLeft = pygUI.pygButton((self.tilesetSurfaceRect.x, (self.tilesetSurfaceRect.y+self.tilesetSurfaceRect.height), 32, 32), fgcolor=(255, 255, 255), normal=g.dataPath + '/themes/default/hslider.left.tga')
-        btnScrollRight = pygUI.pygButton((self.tilesetSurfaceRect.x + (self.tilesetSurfaceRect.width-16), (self.tilesetSurfaceRect.y+self.tilesetSurfaceRect.height), 32, 32), fgcolor=(255, 255, 255), normal=g.dataPath + '/themes/default/hslider.right.tga')
-        btnScrollUp = pygUI.pygButton((self.tilesetSurfaceRect.x + (self.tilesetSurfaceRect.width), self.tilesetSurfaceRect.y, 32, 32), fgcolor=(255, 255, 255), normal=g.dataPath + '/themes/default/vslider.up.tga')
+        btnScrollRight = pygUI.pygButton(
+            (
+                self.tilesetSurfaceRect.x + (self.tilesetSurfaceRect.width - 16),
+                (self.tilesetSurfaceRect.y + self.tilesetSurfaceRect.height),
+                32,
+                32,
+            ),
+            fgcolor=(255, 255, 255),
+            normal=f'{g.dataPath}/themes/default/hslider.right.tga',
+        )
+
+        btnScrollUp = pygUI.pygButton(
+            (
+                self.tilesetSurfaceRect.x + (self.tilesetSurfaceRect.width),
+                self.tilesetSurfaceRect.y,
+                32,
+                32,
+            ),
+            fgcolor=(255, 255, 255),
+            normal=f'{g.dataPath}/themes/default/vslider.up.tga',
+        )
+
         btnScrollDown = pygUI.pygButton((self.tilesetSurfaceRect.x + (self.tilesetSurfaceRect.width), (self.tilesetSurfaceRect.y+self.tilesetSurfaceRect.height-16), 32, 32), fgcolor=(255, 255, 255), normal=g.dataPath + '/themes/default/vslider.down.tga')
 
         self.tileButtons = (btnScrollLeft, btnScrollRight, btnScrollUp, btnScrollDown)
@@ -711,21 +724,22 @@ class MapEditorGUI():
                 button.draw(self.surface)
 
     def update(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 5:
-            # mouse scroll down
-            if self.tilesetOffsetY < (self.tilesetImgRect.height - self.tilesetSurfaceRect.height):
-                self.tilesetOffsetY += PIC_Y
-            self.draw()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 5:
+                # mouse scroll down
+                if self.tilesetOffsetY < (self.tilesetImgRect.height - self.tilesetSurfaceRect.height):
+                    self.tilesetOffsetY += PIC_Y
+                self.draw()
 
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 4:
-            # mouse scroll up
-            if self.tilesetOffsetY > 0:
-                self.tilesetOffsetY -= PIC_Y
-            self.draw()
+            elif event.button == 4:
+                # mouse scroll up
+                if self.tilesetOffsetY > 0:
+                    self.tilesetOffsetY -= PIC_Y
+                self.draw()
 
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            # mouse click
-            self.handleMouseDown(event)
+            else:
+                # mouse click
+                self.handleMouseDown(event)
 
         if self.state == PLACE_TILE:
             if 'click' in self.tileButtons[0].handleEvents(event):
@@ -783,25 +797,18 @@ class MapEditorGUI():
 
     def clearLayer(self):
         ''' clears the layer '''
-        if g.gameEngine.graphicsEngine.gameGUI.guiContainer.mapEditorControl.getTileType() == 0:
-            for x in range(MAX_MAPX):
-                for y in range(MAX_MAPY):
+        for x in range(MAX_MAPX):
+            for y in range(MAX_MAPY):
+                if g.gameEngine.graphicsEngine.gameGUI.guiContainer.mapEditorControl.getTileType() == 0:
                     Map.tile[x][y].layer1 = None
 
-        elif g.gameEngine.graphicsEngine.gameGUI.guiContainer.mapEditorControl.getTileType() == 1:
-            for x in range(MAX_MAPX):
-                for y in range(MAX_MAPY):
+                elif g.gameEngine.graphicsEngine.gameGUI.guiContainer.mapEditorControl.getTileType() == 1:
                     Map.tile[x][y].layer2 = None
 
-        elif g.gameEngine.graphicsEngine.gameGUI.guiContainer.mapEditorControl.getTileType() == 2:
-            for x in range(MAX_MAPX):
-                for y in range(MAX_MAPY):
+                elif g.gameEngine.graphicsEngine.gameGUI.guiContainer.mapEditorControl.getTileType() == 2:
                     Map.tile[x][y].layer3 = None
 
-        # fill fringe layer
-        elif g.gameEngine.graphicsEngine.gameGUI.guiContainer.mapEditorControl.getTileType() == 3:
-            for x in range(MAX_MAPX):
-                for y in range(MAX_MAPY):
+                elif g.gameEngine.graphicsEngine.gameGUI.guiContainer.mapEditorControl.getTileType() == 3:
                     Map.tile[x][y].fringe = None
 
         calcTilePositions()

@@ -13,31 +13,31 @@ class _Menu_Options(table.Table):
     def event(self,e):
         handled = False
         arect = self.get_abs_rect()
-        
+
         if e.type == MOUSEMOTION:
             abspos = e.pos[0]+arect.x,e.pos[1]+arect.y
             for w in self.menu.container.widgets:
-                if not w is self.menu:
+                if w is not self.menu:
                     mrect = w.get_abs_rect()
                     if mrect.collidepoint(abspos):
                         self.menu._close(None)
                         w._open(None)
                         handled = True
-        
+
         if not handled: table.Table.event(self,e)
 
 class _Menu(button.Button):
     def __init__(self,parent,widget=None,**params): #TODO widget= could conflict with module widget
         params.setdefault('cls','menu')
         button.Button.__init__(self,widget,**params)
-        
+
         self.parent = parent
-        
+
         self._cls = self.cls
-        self.options = _Menu_Options(self, cls=self.cls+".options")
-        
+        self.options = _Menu_Options(self, cls=f'{self.cls}.options')
+
         self.connect(CLICK,self._open,None)
-        
+
         self.pos = 0
     
     def _open(self,value):
@@ -72,12 +72,12 @@ class _Menu(button.Button):
     
     def add(self,w,fnc=None,value=None):
         w.style.align = -1
-        b = button.Button(w,cls=self.cls+".option")
+        b = button.Button(w, cls=f'{self.cls}.option')
         b.connect(CLICK,self._valuefunc,{'fnc':fnc,'value':value})
-        
+
         self.options.tr()
         self.options.add(b)
-        
+
         return b
 
 class Menus(table.Table):
@@ -99,17 +99,17 @@ class Menus(table.Table):
     def __init__(self,data,menu_cls='menu',**params):
         params.setdefault('cls','menus')
         table.Table.__init__(self,**params)
-        
+
         self.value = None
-        
+
         n,m,mt = 0,None,None
         for path,cmd,value in data:
             parts = path.split("/")
             if parts[0] != mt:
                 mt = parts[0]
-                m = _Menu(self,basic.Label(mt,cls=menu_cls+".label"),cls=menu_cls)
+                m = _Menu(self, basic.Label(mt, cls=f'{menu_cls}.label'), cls=menu_cls)
                 self.add(m,n,0)
                 n += 1
             print ("add", parts[1], cmd, value)
-            m.add(basic.Label(parts[1],cls=m.cls+".option.label"),cmd,value)
+            m.add(basic.Label(parts[1], cls=f'{m.cls}.option.label'), cmd, value)
 

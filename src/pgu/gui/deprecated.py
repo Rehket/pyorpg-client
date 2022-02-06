@@ -32,8 +32,7 @@ class Toolbox(table.Table):
         if k == 'value' and _v != NOATTR and _v != v: 
             self.group.value = v
             for w in self.group.widgets:
-                if w.value != v: w.pcls = ""
-                else: w.pcls = "down"
+                w.pcls = "" if w.value != v else "down"
             self.repaint()
     
     def _change(self,value):
@@ -44,32 +43,31 @@ class Toolbox(table.Table):
         print('gui.Toolbox','Scheduled to be deprecated.')
         params.setdefault('cls','toolbox')
         table.Table.__init__(self,**params)
-        
+
         if cols == 0 and rows == 0: cols = len(data)
         if cols != 0 and rows != 0: rows = 0
-        
+
         self.tools = {}
-        
+
         _value = value
-        
+
         g = group.Group()
         self.group = g
         g.connect(CHANGE,self._change,None)
         self.group.value = _value
-        
+
         x,y,p,s = 0,0,None,1
+        s = 0
         for ico,value in data:
-            #from __init__ import theme
-            img = pguglobals.app.theme.get(tool_cls+"."+ico,"","image")
-            if img:
+            if img := pguglobals.app.theme.get(f'{tool_cls}.{ico}', "", "image"):
                 i = basic.Image(img)
-            else: i = basic.Label(ico,cls=tool_cls+".label")
+            else:
+                i = basic.Label(ico, cls=f'{tool_cls}.label')
             p = button.Tool(g,i,value,cls=tool_cls)
             self.tools[ico] = p
             #p.style.hexpand = 1
             #p.style.vexpand = 1
             self.add(p,x,y)
-            s = 0
             if cols != 0: x += 1
             if cols != 0 and x == cols: x,y = 0,y+1
             if rows != 0: y += 1

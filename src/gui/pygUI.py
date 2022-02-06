@@ -72,9 +72,8 @@ class pygClassClickable(object):
                 self.lastMouseDownOverButton = True
                 self.mouseDown(event)
                 returnValue.append('down')
-        else:
-            if event.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN):
-                self.lastMouseDownOverButton = False
+        elif event.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN):
+            self.lastMouseDownOverButton = False
 
         doMouseClick = False
 
@@ -151,21 +150,12 @@ class pygLabel():
 #############
 class pygButton(object):
     def __init__(self, rect=None, caption='', bgcolor=WHITE, fgcolor=BLACK, font=None, normal=None, down=None, highlight=None):
-        if rect is None:
-            self._rect = pygame.rect(0, 0, 30, 60)
-
-        else:
-            self._rect = pygame.Rect(rect)
-
+        self._rect = pygame.rect(0, 0, 30, 60) if rect is None else pygame.Rect(rect)
         self._caption = caption
         self._bgcolor = bgcolor
         self._fgcolor = fgcolor
 
-        if font is None:
-            self._font = SYSFONT
-        else:
-            self._font = font
-
+        self._font = SYSFONT if font is None else font
         self._visible = True
 
         # state of button
@@ -179,11 +169,10 @@ class pygButton(object):
             self.surfaceNormal = pygame.Surface(self._rect.size)
             self.surfaceDown = pygame.Surface(self._rect.size)
             self.surfaceHighlight = pygame.Surface(self._rect.size)
-            self._update()
-
         else:
             self.setSurfaces(normal, down, highlight)
-            self._update()
+
+        self._update()
 
     def setColor(self, color):
         self._bgcolor = color
@@ -318,9 +307,8 @@ class pygButton(object):
                 self.lastMouseDownOverButton = True
                 self.mouseDown(event)
                 returnValue.append('down')
-        else:
-            if event.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN):
-                self.lastMouseDownOverButton = False
+        elif event.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN):
+            self.lastMouseDownOverButton = False
 
         doMouseClick = False
 

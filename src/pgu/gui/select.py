@@ -33,18 +33,18 @@ class Select(Table):
     def __init__(self,value=None,**params):
         params.setdefault('cls','select')
         Table.__init__(self,**params)
-        
+
         label = Label(" ",cls=self.cls+".option.label")
         self.top_selected = Button(label, cls=self.cls+".selected")
         Table.add(self,self.top_selected) #,hexpand=1,vexpand=1)#,0,0)
-        
+
         self.top_arrow = Button(Image(self.style.arrow), cls=self.cls+".arrow")
         Table.add(self,self.top_arrow) #,hexpand=1,vexpand=1) #,1,0)
-        
-        self.options = Table(cls=self.cls+".options")
+
+        self.options = Table(cls=f'{self.cls}.options')
         self.options.connect(BLUR,self._close,None)
         self.options.name = "pulldown-table"
-        
+
         self.values = []
         self.value = value
 
@@ -106,13 +106,8 @@ class Select(Table):
     
     def _setvalue(self,value):
         self.value = value._value
-        if self.container:
-            #self.chsize()
-            #HACK: improper use of resize()
-            #self.resize() #to recenter the new value, etc.
-            pass
         #    #self._resize()
-        
+
         self._close(None)
         #self.repaint() #this will happen anyways
         
@@ -133,7 +128,7 @@ class Select(Table):
             self.send(CHANGE)
             self.repaint()
         if not mywidget:
-            mywidget = Label(" ",cls=self.cls+".option.label")
+            mywidget = Label(" ", cls=f'{self.cls}.option.label')
         self.top_selected.value = mywidget
         
     
@@ -141,19 +136,18 @@ class Select(Table):
         """Add a widget and associated value to the dropdown box."""
         
         if type(w) == str: w = Label(w,cls=self.cls+".option.label")
-        
+
         w.style.align = -1
-        btn = Button(w,cls=self.cls+".option")
+        btn = Button(w, cls=f'{self.cls}.option')
         btn.connect(CLICK,self._setvalue,w)
-        
+
         self.options.tr()
         self.options.add(btn)
-        
+
         if (not self.firstOption):
             self.firstOption = btn
-        
-        if value != None: w._value = value
-        else: w._value = w
+
+        w._value = value if value != None else w
         if self.value == w._value:
             self.top_selected.value = w
         self.values.append(w)

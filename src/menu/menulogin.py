@@ -69,7 +69,7 @@ class menuLogin():
         self.x = 10
         self.y = 10
 
-        self.backgroundImage = pygame.image.load(g.dataPath + '/gui/bg_menu.png')
+        self.backgroundImage = pygame.image.load(f'{g.dataPath}/gui/bg_menu.png')
 
     def draw(self):
         # background
@@ -89,6 +89,9 @@ class menuLogin():
         self.username = self.loginCtrl.value.items()[0][1]
         self.password = self.loginCtrl.value.items()[1][1]
 
-        if len(self.username) >= 3 and len(self.password) >= 3:
-            if g.tcpConn is None or (g.tcpConn is not None and len(g.gameEngine.menuChar.characters) == 0):
-                g.gameEngine.initConnection()
+        if (
+            len(self.username) >= 3
+            and len(self.password) >= 3
+            and (g.tcpConn is None or len(g.gameEngine.menuChar.characters) == 0)
+        ):
+            g.gameEngine.initConnection()

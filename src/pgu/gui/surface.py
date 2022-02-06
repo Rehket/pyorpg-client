@@ -39,7 +39,7 @@ class ProxySurface:
         if rect.x < 0: self.x = rect.x
         if rect.y < 0: self.y = rect.y
         self.real_surface = real_surface
-        if real_surface == None:
+        if real_surface is None:
             self.mysubsurface = parent.mysubsurface.subsurface(
                 parent.mysubsurface.get_rect().clip(rect))
         else:
@@ -49,7 +49,7 @@ class ProxySurface:
         self.rect = rect
         
     def blit(self, s, pos, rect=None):
-        if rect == None: rect = s.get_rect()
+        if rect is None: rect = s.get_rect()
         pos = (pos[0] + self.offset[0] + self.x, pos[1] + self.offset[1] + self.y)
         self.mysubsurface.blit(s, pos, rect)
         
@@ -67,7 +67,7 @@ class ProxySurface:
     def get_abs_offset(): return self.rect[:2]
     def get_abs_parent(): return self.mysubsurface.get_abs_parent()
     def set_clip(self, rect=None): 
-        if rect == None: self.mysubsurface.set_clip()
+        if rect is None: self.mysubsurface.set_clip()
         else: 
             rect = [rect[0] + self.offset[0] + self.x, rect[1] + self.offset[0] + self.y, rect[2], rect[3]]
             self.mysubsurface.set_clip(rect)
@@ -85,7 +85,7 @@ class xProxySurface:
         if rect[0] < 0: self.x = rect[0]
         if rect[1] < 0: self.y = rect[1]
         self.real_surface = real_surface
-        if real_surface == None:
+        if real_surface is None:
             self.mysubsurface = parent.mysubsurface.subsurface(parent.mysubsurface.get_rect().clip(rect))
         else:
             self.mysubsurface = real_surface.subsurface(real_surface.get_rect().clip(rect))
@@ -93,7 +93,7 @@ class xProxySurface:
         self.rect = rect
         
     def blit(self, s, pos, rect=None):
-        if rect == None: rect = s.get_rect()
+        if rect is None: rect = s.get_rect()
         pos = (pos[0] + self.offset[0] + self.x, pos[1] + self.offset[1] + self.y)
         self.mysubsurface.blit(s, pos, rect)
         
@@ -107,7 +107,7 @@ class xProxySurface:
     def get_abs_offset(): return self.rect[:2]
     def get_abs_parent(): return self.mysubsurface.get_abs_parent()
     def set_clip(self, rect=None): 
-        if rect == None: self.mysubsurface.set_clip()
+        if rect is None: self.mysubsurface.set_clip()
         else: 
             rect = [rect[0] + self.offset[0] + self.x, rect[1] + self.offset[0] + self.y, rect[2], rect[3]]
             self.mysubsurface.set_clip(rect)

@@ -50,7 +50,7 @@ class gameClientProtocol(LineReceiver):
         decodedData = base64.b64decode(data)
 
         log("Received data from server")
-        log(" -> " + decodedData)
+        log(f' -> {decodedData}')
 
         dataHandler.handleData(decodedData)
 
@@ -168,18 +168,21 @@ class TCPConnection():
 
         #canMoveNow = false
 
-        packet = []
-        packet.append({"packet": ClientPackets.CMapData, \
-                       "mapname": Map.name, \
-                       "moral": Map.moral, \
-                       "tileset": Map.tileSet, \
-                       "up": Map.up, \
-                       "down": Map.down, \
-                       "left": Map.left, \
-                       "right": Map.right, \
-                       "bootmap": Map.bootMap, \
-                       "bootx": Map.bootX, \
-                       "booty": Map.bootY})
+        packet = [
+            {
+                "packet": ClientPackets.CMapData,
+                "mapname": Map.name,
+                "moral": Map.moral,
+                "tileset": Map.tileSet,
+                "up": Map.up,
+                "down": Map.down,
+                "left": Map.left,
+                "right": Map.right,
+                "bootmap": Map.bootMap,
+                "bootx": Map.bootX,
+                "booty": Map.bootY,
+            }
+        ]
 
         for x in range(MAX_MAPX):
             for y in range(MAX_MAPY):
@@ -196,10 +199,7 @@ class TCPConnection():
                                 "data3":     tempTile.data3}])
 
 
-        for i in range(MAX_MAP_NPCS):
-            packet.append([{'npcnum': Map.npc[i]}])
-
-
+        packet.extend([{'npcnum': Map.npc[i]}] for i in range(MAX_MAP_NPCS))
         packet = json.dumps(packet)
         self.sendData(packet)
 

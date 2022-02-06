@@ -75,7 +75,7 @@ class menuNewCharacter():
         self.x = 10
         self.y = 10
 
-        self.backgroundImage = pygame.image.load(g.dataPath + '/gui/bg_menu.png')
+        self.backgroundImage = pygame.image.load(f'{g.dataPath}/gui/bg_menu.png')
 
         # class selection
         self.classIndex = 0
@@ -144,10 +144,9 @@ class menuNewCharacter():
     def createCharacter(self):
         name = self.charControl.inpCharName.value
 
-        if len(name) >= 3:
-            if self.isStringLegal(name):
-                g.tcpConn.sendAddChar(name, "male", self.classIndex, (g.gameEngine.menuChar.charIndex-1))
-                g.gameEngine.setState(MENU_CHAR)
+        if len(name) >= 3 and self.isStringLegal(name):
+            g.tcpConn.sendAddChar(name, "male", self.classIndex, (g.gameEngine.menuChar.charIndex-1))
+            g.gameEngine.setState(MENU_CHAR)
 
     def updateClassSelection(self):
         if self.classIndex > (g.maxClasses-1):
@@ -169,7 +168,10 @@ class menuNewCharacter():
         self.updateCharSprite(Class[self.classIndex].sprite)
 
     def updateCharSprite(self, sprite):
-        tempImage = pygame.image.load(g.dataPath + "/sprites/" + str(sprite) + ".png").convert_alpha()
+        tempImage = pygame.image.load(
+            f'{g.dataPath}/sprites/' + str(sprite) + ".png"
+        ).convert_alpha()
+
         tempSprite = pygame.Surface((64, 64))
 
         tempSprite.blit(tempImage, (0, 0), (0, 128, 64, 64))

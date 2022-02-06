@@ -28,23 +28,38 @@ class GraphicsEngine():
         self.surfaceRect.left = 16
 
         # surfaces
-        self.tileSurface = pygame.image.load(g.dataPath + "/tilesets/Tiles1.png").convert()
-        self.shadowSurface = pygame.image.load(g.dataPath + "/sprites/shadow.png").convert_alpha()
-        self.targetSurface = pygame.image.load(g.dataPath + "/sprites/target.png").convert_alpha()
+        self.tileSurface = pygame.image.load(
+            f'{g.dataPath}/tilesets/Tiles1.png'
+        ).convert()
+
+        self.shadowSurface = pygame.image.load(
+            f'{g.dataPath}/sprites/shadow.png'
+        ).convert_alpha()
+
+        self.targetSurface = pygame.image.load(
+            f'{g.dataPath}/sprites/target.png'
+        ).convert_alpha()
+
         # todo: transparency
         #self.tileSurface.set_colorkey((0, 0, 255))
-        self.tileOutlineSurface = pygame.image.load(g.dataPath + "/gui/editor_outline.bmp").convert()
+        self.tileOutlineSurface = pygame.image.load(
+            f'{g.dataPath}/gui/editor_outline.bmp'
+        ).convert()
+
         self.tileOutlineSurface.set_colorkey((255, 0, 204))
 
         self.fontPlrName = g.systemFont #pygame.font.SysFont(None, 18)
         self.drawMapNameColor = textColor.BRIGHT_RED
 
         # fringe tiles
-        self.tileSurfaceTrans = pygame.image.load(g.dataPath + "/tilesets/Tiles1.png").convert()
+        self.tileSurfaceTrans = pygame.image.load(
+            f'{g.dataPath}/tilesets/Tiles1.png'
+        ).convert()
+
         self.tileSurfaceTrans.set_colorkey((0, 0, 0))
 
         # map surfaces
-        self.mapLayerSurface = [MapLayerSprite() for i in range(MAP_MAX_LAYERS)]
+        self.mapLayerSurface = [MapLayerSprite() for _ in range(MAP_MAX_LAYERS)]
 
         ###############
         # GAME EDITOR #
@@ -89,7 +104,7 @@ class GraphicsEngine():
         self.gameGUI = GameGUI(self)
 
         # gui background
-        self.backgroundGUI = pygame.image.load(g.dataPath + '/gui/bg_ingame.png')
+        self.backgroundGUI = pygame.image.load(f'{g.dataPath}/gui/bg_ingame.png')
         g.guiSurface.blit(self.backgroundGUI, (0, 0))
 
         self.guiState = GUI_STATS
@@ -115,20 +130,20 @@ class GraphicsEngine():
                 self.drawMapItem(i)
 
         # players (bottom)
-        for i in range(0, len(g.playersOnMap)):
+        for i in range(len(g.playersOnMap)):
             self.drawPlayer(g.playersOnMap[i])
 
         # npcs (bottom)
         #for i in range(0, g.npcHighIndex):
-        for i in range(0, MAX_MAP_NPCS):
+        for i in range(MAX_MAP_NPCS):
             self.drawNPC(i)
 
         # players (top)
-        for i in range(0, len(g.playersOnMap)):
+        for i in range(len(g.playersOnMap)):
             self.drawPlayerTop(g.playersOnMap[i])
 
         # npcs (top)
-        for i in range(0, MAX_MAP_NPCS):
+        for i in range(MAX_MAP_NPCS):
             self.drawNPCTop(i)
 
         # draw map fringe layer
@@ -144,7 +159,7 @@ class GraphicsEngine():
         # TEXT RENDERING #
         ##################
 
-        for i in range(0, len(g.playersOnMap)):
+        for i in range(len(g.playersOnMap)):
             self.drawPlayerName(g.playersOnMap[i])
 
         self.drawMapName(Map.name)
@@ -187,16 +202,16 @@ class GraphicsEngine():
     def redrawMap(self):
         # draw all the sprites onto the mapSurface sprite
         # clean surfaces
-        self.mapLayerSurface = [MapLayerSprite() for i in range(MAP_MAX_LAYERS)]
+        self.mapLayerSurface = [MapLayerSprite() for _ in range(MAP_MAX_LAYERS)]
 
         for x in range(MAX_MAPX):
             for y in range(MAX_MAPY):
-                if Map.tile[x][y].layer1 != None:
-                    self.mapLayerSurface[MAP_LAYER_1].image.blit(self.tileSurface, (MapTilePosition[x][y].x, MapTilePosition[x][y].y), (MapTilePosition[x][y].layer1))
-                else:
+                if Map.tile[x][y].layer1 is None:
                     # draw black square
                     pygame.draw.rect(self.mapLayerSurface[MAP_LAYER_1].image, (0, 0, 0), (MapTilePosition[x][y].x, MapTilePosition[x][y].y, 32, 32))
 
+                else:
+                    self.mapLayerSurface[MAP_LAYER_1].image.blit(self.tileSurface, (MapTilePosition[x][y].x, MapTilePosition[x][y].y), (MapTilePosition[x][y].layer1))
                 if Map.tile[x][y].layer2 != None:
                     self.mapLayerSurface[MAP_LAYER_2].image.blit(self.tileSurfaceTrans, (MapTilePosition[x][y].x, MapTilePosition[x][y].y), (MapTilePosition[x][y].layer2))
 
@@ -238,12 +253,7 @@ class GraphicsEngine():
         rect = self.targetSurface.get_rect()
         rect.centerx = x + (PIC_X / 2)
 
-        if y == 0 or y == 1:
-            # draw the pointer below sprite
-            rect.y = y + 70
-        else:
-            rect.y = y - 15
-
+        rect.y = y + 70 if y in [0, 1] else y - 15
         self.surface.blit(self.targetSurface, rect)
 
     def calculatePlrAnimFrame(self, offset, tileSize):
@@ -290,10 +300,10 @@ class GraphicsEngine():
             if Player[index].moving != 0:
                 direction = getPlayerDir(index)
 
-                if direction == DIR_UP or direction == DIR_DOWN:
+                if direction in [DIR_UP, DIR_DOWN]:
                     anim = self.calculatePlrAnimFrame(Player[index].yOffset, SIZE_Y)
 
-                elif direction == DIR_LEFT or direction == DIR_RIGHT:
+                elif direction in [DIR_LEFT, DIR_RIGHT]:
                     anim = self.calculatePlrAnimFrame(Player[index].xOffset, SIZE_X)
 
         elif (Player[index].attackTimer + 500) > tickCount:
@@ -311,10 +321,7 @@ class GraphicsEngine():
         x = getPlayerX(index) * SIZE_X + Player[index].xOffset
         y = getPlayerY(index) * SIZE_Y + Player[index].yOffset - 4
 
-        if y < 0:
-            y = 0
-            #rect.y = rect.y + (y * -1)
-
+        y = max(y, 0)
         self.drawShadow(x, y+18)
         self.drawSprite(sprite, x, y, rect)
 
@@ -322,22 +329,21 @@ class GraphicsEngine():
         for i in range(MAX_SPELLANIM):
             spellNum = Player[index].spellAnimations[i].spellNum
 
-            if spellNum is not None:
-                if Spell[spellNum].pic != None:
-                    tickCount = time.time() * 1000
+            if spellNum is not None and Spell[spellNum].pic != None:
+                tickCount = time.time() * 1000
 
-                    if Player[index].spellAnimations[i].timer < tickCount:
-                        Player[index].spellAnimations[i].framePointer += 1
-                        Player[index].spellAnimations[i].timer = tickCount + 120
+                if Player[index].spellAnimations[i].timer < tickCount:
+                    Player[index].spellAnimations[i].framePointer += 1
+                    Player[index].spellAnimations[i].timer = tickCount + 120
 
-                        if Player[index].spellAnimations[i].framePointer >= ResourceManager.spellSprites[Spell[spellNum].pic].get_rect().w // SIZE_X:
-                            Player[index].spellAnimations[i].spellNum = 0
-                            Player[index].spellAnimations[i].timer = 0
-                            Player[index].spellAnimations[i].framePointer = 0
+                    if Player[index].spellAnimations[i].framePointer >= ResourceManager.spellSprites[Spell[spellNum].pic].get_rect().w // SIZE_X:
+                        Player[index].spellAnimations[i].spellNum = 0
+                        Player[index].spellAnimations[i].timer = 0
+                        Player[index].spellAnimations[i].framePointer = 0
 
-                    if Player[index].spellAnimations[i].spellNum is not None:
-                        rect = pygame.Rect((Player[index].spellAnimations[i].framePointer * SIZE_X, 0, 32, 32))
-                        self.drawSpell(Spell[spellNum].pic, x, y, rect)
+                if Player[index].spellAnimations[i].spellNum is not None:
+                    rect = pygame.Rect((Player[index].spellAnimations[i].framePointer * SIZE_X, 0, 32, 32))
+                    self.drawSpell(Spell[spellNum].pic, x, y, rect)
 
 
     def drawPlayerTop(self, index):
@@ -353,10 +359,10 @@ class GraphicsEngine():
             if Player[index].moving != 0:
                 direction = getPlayerDir(index)
 
-                if direction == DIR_UP or direction == DIR_DOWN:
+                if direction in [DIR_UP, DIR_DOWN]:
                     anim = self.calculatePlrAnimFrame(Player[index].yOffset, SIZE_Y)
 
-                elif direction == DIR_LEFT or direction == DIR_RIGHT:
+                elif direction in [DIR_LEFT, DIR_RIGHT]:
                     anim = self.calculatePlrAnimFrame(Player[index].xOffset, SIZE_X)
 
         elif (Player[index].attackTimer + 500) > tickCount:
@@ -399,11 +405,11 @@ class GraphicsEngine():
         if mapNPC[mapNpcNum].attacking == 0:
             direction = mapNPC[mapNpcNum].dir
 
-            if direction == DIR_UP or direction == DIR_DOWN:
-                    anim = self.calculatePlrAnimFrame(mapNPC[mapNpcNum].yOffset, SIZE_Y)
+            if direction in [DIR_UP, DIR_DOWN]:
+                anim = self.calculatePlrAnimFrame(mapNPC[mapNpcNum].yOffset, SIZE_Y)
 
-            elif direction == DIR_LEFT or direction == DIR_RIGHT:
-                    anim = self.calculatePlrAnimFrame(mapNPC[mapNpcNum].xOffset, SIZE_X)
+            elif direction in [DIR_LEFT, DIR_RIGHT]:
+                anim = self.calculatePlrAnimFrame(mapNPC[mapNpcNum].xOffset, SIZE_X)
 
         elif (mapNPC[mapNpcNum].attackTimer + 500) > tickCount:
             anim = 2
@@ -420,10 +426,7 @@ class GraphicsEngine():
         y = mapNPC[mapNpcNum].y * SIZE_Y + mapNPC[mapNpcNum].yOffset - 4
 
         # check if out of bounds because of y offset
-        if y < 0:
-            y = 0
-            #rect.y = rect.y + (y * -1)
-
+        y = max(y, 0)
         self.drawShadow(x, y+18)
         self.drawSprite(sprite, x, y, rect)
 
@@ -431,22 +434,21 @@ class GraphicsEngine():
         for i in range(MAX_SPELLANIM):
             spellNum = mapNPC[mapNpcNum].spellAnimations[i].spellNum
 
-            if spellNum is not None:
-                if Spell[spellNum].pic != None:
-                    tickCount = time.time() * 1000
+            if spellNum is not None and Spell[spellNum].pic != None:
+                tickCount = time.time() * 1000
 
-                    if mapNPC[mapNpcNum].spellAnimations[i].timer < tickCount:
-                        mapNPC[mapNpcNum].spellAnimations[i].framePointer += 1
-                        mapNPC[mapNpcNum].spellAnimations[i].timer = tickCount + 120
+                if mapNPC[mapNpcNum].spellAnimations[i].timer < tickCount:
+                    mapNPC[mapNpcNum].spellAnimations[i].framePointer += 1
+                    mapNPC[mapNpcNum].spellAnimations[i].timer = tickCount + 120
 
-                        if mapNPC[mapNpcNum].spellAnimations[i].framePointer >= ResourceManager.spellSprites[Spell[spellNum].pic].get_rect().w // SIZE_X:
-                            mapNPC[mapNpcNum].spellAnimations[i].spellNum = None
-                            mapNPC[mapNpcNum].spellAnimations[i].timer = 0
-                            mapNPC[mapNpcNum].spellAnimations[i].framePointer = 0
+                    if mapNPC[mapNpcNum].spellAnimations[i].framePointer >= ResourceManager.spellSprites[Spell[spellNum].pic].get_rect().w // SIZE_X:
+                        mapNPC[mapNpcNum].spellAnimations[i].spellNum = None
+                        mapNPC[mapNpcNum].spellAnimations[i].timer = 0
+                        mapNPC[mapNpcNum].spellAnimations[i].framePointer = 0
 
-                    if mapNPC[mapNpcNum].spellAnimations[i].spellNum is not None:
-                        rect = pygame.Rect((mapNPC[mapNpcNum].spellAnimations[i].framePointer * SIZE_X, 0, 32, 32))
-                        self.drawSpell(Spell[spellNum].pic, x, y, rect)
+                if mapNPC[mapNpcNum].spellAnimations[i].spellNum is not None:
+                    rect = pygame.Rect((mapNPC[mapNpcNum].spellAnimations[i].framePointer * SIZE_X, 0, 32, 32))
+                    self.drawSpell(Spell[spellNum].pic, x, y, rect)
 
     def drawNPCTop(self, mapNpcNum):
         if mapNPC[mapNpcNum].num is None:
@@ -461,11 +463,11 @@ class GraphicsEngine():
         if mapNPC[mapNpcNum].attacking == 0:
             direction = mapNPC[mapNpcNum].dir
 
-            if direction == DIR_UP or direction == DIR_DOWN:
-                    anim = self.calculatePlrAnimFrame(mapNPC[mapNpcNum].yOffset, SIZE_Y)
+            if direction in [DIR_UP, DIR_DOWN]:
+                anim = self.calculatePlrAnimFrame(mapNPC[mapNpcNum].yOffset, SIZE_Y)
 
-            elif direction == DIR_LEFT or direction == DIR_RIGHT:
-                    anim = self.calculatePlrAnimFrame(mapNPC[mapNpcNum].xOffset, SIZE_X)
+            elif direction in [DIR_LEFT, DIR_RIGHT]:
+                anim = self.calculatePlrAnimFrame(mapNPC[mapNpcNum].xOffset, SIZE_X)
 
         elif (mapNPC[mapNpcNum].attackTimer + 500) > tickCount:
             anim = 2
@@ -516,9 +518,7 @@ class GraphicsEngine():
     def drawPlayerName(self, index):
         plrAccess = getPlayerAccess(index)
 
-        if plrAccess == 0:
-            color = textColor.BROWN
-        elif plrAccess == 1:
+        if plrAccess == 1:
             color = textColor.DARK_GREY
         elif plrAccess == 2:
             color = textColor.CYAN
@@ -537,12 +537,8 @@ class GraphicsEngine():
         textY = getPlayerY(index) * PIC_Y + Player[index].yOffset - (2*PIC_Y//2) - 4
 
         # make sure text isnt out of screen
-        if textY <= 0:
-            textY = 0
-
-        if textX <= 0:
-            textX = 0
-
+        textY = max(textY, 0)
+        textX = max(textX, 0)
         if textX + textSize[0] >= 480:
             textX = 480 - textSize[0]
 
@@ -596,6 +592,5 @@ class GraphicsEngine():
         x = (g.cursorX-16) / PIC_X
         y = (g.cursorY-16) / PIC_Y
 
-        if x >= 0 and x < MAX_MAPX:
-            if y >= 0 and y < MAX_MAPY:
-                self.surface.blit(self.tileOutlineSurface, (MapTilePosition[x][y].x, MapTilePosition[x][y].y))
+        if x >= 0 and x < MAX_MAPX and y >= 0 and y < MAX_MAPY:
+            self.surface.blit(self.tileOutlineSurface, (MapTilePosition[x][y].x, MapTilePosition[x][y].y))

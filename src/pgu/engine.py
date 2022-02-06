@@ -64,8 +64,7 @@ class Game:
         s = self.state
         if not hasattr(s,f): return 0
         f = getattr(s,f)
-        if v != None: r = f(v)
-        else: r = f()
+        r = f(v) if v != None else f()
         if r != None:
             self.state = r
             self.state._paint = 1
@@ -94,19 +93,16 @@ class Game:
         if not hasattr(s,'_init') or s._init:
             s._init = 0
             if self.fnc('init'): return
-        else: 
-            if self.fnc('loop'): return
+        elif self.fnc('loop'): return
         if not hasattr(s,'_paint') or s._paint:
             s._paint = 0
             if self.fnc('paint',self.screen): return
-        else: 
-            if self.fnc('update',self.screen): return
-        
+        elif self.fnc('update',self.screen): return
         for e in pygame.event.get():
             #NOTE: this might break API?
             #if self.event(e): return
-            if not self.event(e):
-                if self.fnc('event',e): return
+            if not self.event(e) and self.fnc('event', e):
+                return
         self.tick()
         return
             

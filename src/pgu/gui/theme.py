@@ -59,26 +59,22 @@ class Theme:
     
     def _load(self, name):
         #theme_dir = themes[name]
-        
+
         #try to load the local dir, or absolute path
-        dnames = [name]
-        
-        #if the package isn't installed and people are just
-        #trying out the scripts or examples
-        dnames.append(os.path.join("..","data","themes",name))
-        
+        dnames = [name, os.path.join("..", "data", "themes", name)]
+
         #if the package is installed, and the package is installed
         #in /usr/lib/python2.3/site-packages/pgu/
         #or c:\python23\lib\site-packages\pgu\
         #the data is in ... lib/../share/ ...
         dnames.append(os.path.join(os.path.dirname(__file__),"..","..","..","..","share","pgu","themes",name))
         dnames.append(os.path.join(os.path.dirname(__file__),"..","..","..","..","..","share","pgu","themes",name))
-        dnames.append(os.path.join(os.path.dirname(__file__),"..","..","share","pgu","themes",name)) 
+        dnames.append(os.path.join(os.path.dirname(__file__),"..","..","share","pgu","themes",name))
         for dname in dnames:
             if os.path.isdir(dname): break
 
         if not os.path.isdir(dname): 
-            raise Exception('could not find theme '+name)
+            raise Exception(f'could not find theme {name}')
 
         # Normalize the path to make it look nicer (gets rid of the ..'s)
         dname = os.path.normpath(dname)
@@ -125,7 +121,7 @@ class Theme:
 
     def _get(self, cls, pcls, attr):
         key = (cls, pcls, attr)
-        if not key in self.config:
+        if key not in self.config:
             return
 
         if key in self.cache:
@@ -138,7 +134,7 @@ class Theme:
             # This is an image attribute
             v = pygame.image.load(os.path.join(dname, vals[0]))
 
-        elif (attr == "color" or attr == "background"):
+        elif attr in ["color", "background"]:
             # This is a color value
             v = parse_color(vals[0])
 
@@ -187,28 +183,23 @@ class Theme:
             self._preload("default")
 
         o = (cls, pcls, attr)
-        
-        v = self._get(cls, pcls, attr)
-        if v: 
+
+        if v := self._get(cls, pcls, attr):
             return v
-        
-        v = self._get(cls, "", attr)
-        if v: 
+
+        if v := self._get(cls, "", attr):
             return v
-        
-        v = self._get("default", "", attr)
-        if v: 
+
+        if v := self._get("default", "", attr):
             return v
-        
+
         # The style doesn't exist
         self.cache[o] = 0
         raise StyleError("Style not defined: '%s', '%s', '%s'" % o)
 
     # Draws a box around the surface in the given style
     def box(self, style, surf):
-        c = (0, 0, 0)
-        if style.border_color != 0:
-            c = style.border_color
+        c = style.border_color if style.border_color != 0 else (0, 0, 0)
         w,h = surf.get_size()
 
         surf.fill(c,(0,0,w,style.border_top))
@@ -238,7 +229,7 @@ class Theme:
 
         def theme_resize(width=None,height=None):
             s = w.style
-            
+
             pt,pr,pb,pl = (s.padding_top,s.padding_right,
                            s.padding_bottom,s.padding_left)
             bt,br,bb,bl = (s.border_top,s.border_right,
@@ -252,25 +243,25 @@ class Theme:
             left = pl+bl+ml
             ttw = left+right
             tth = top+bottom
-            
+
             tilew,tileh = None,None
             if width != None: tilew = width-ttw
             if height != None: tileh = height-tth
             tilew,tileh = func(tilew,tileh)
 
-            if width == None: width = tilew
-            if height == None: height = tileh
-            
+            if width is None: width = tilew
+            if height is None: height = tileh
+
             #if the widget hasn't respected the style.width,
             #style height, we'll add in the space for it...
             width = max(width-ttw, tilew, w.style.width)
             height = max(height-tth, tileh, w.style.height)
-            
+
             #width = max(tilew,w.style.width-tw)
             #height = max(tileh,w.style.height-th)
 
             r = pygame.Rect(left,top,width,height)
-            
+
             w._rect_padding = expand_rect(r, pl, pt, pr, pb)
             w._rect_border = expand_rect(w._rect_padding, bl, bt, br, bb)
             w._rect_margin = expand_rect(w._rect_border, ml, mt, mr, mb)
@@ -339,11 +330,7 @@ class Theme:
                 # set before a mouse event is received. In this case we'll ignore the event.
                 return func(e)
 
-            if e.type == MOUSEBUTTONUP or e.type == MOUSEBUTTONDOWN:
-                sub = pygame.event.Event(e.type,{
-                    'button':e.button,
-                    'pos':(e.pos[0]-rect.x,e.pos[1]-rect.y)})
-            elif e.type == CLICK:
+            if e.type in [MOUSEBUTTONUP, MOUSEBUTTONDOWN, CLICK]:
                 sub = pygame.event.Event(e.type,{
                     'button':e.button,
                     'pos':(e.pos[0]-rect.x,e.pos[1]-rect.y)})
@@ -432,11 +419,8 @@ class Theme:
         if is_color(box):
             surf.fill(box,r)
             return
-        
-        x,y,w,h=r.x,r.y,r.w,r.h
 
-        if (size and offset):
-            pass
+        x,y,w,h=r.x,r.y,r.w,r.h
 #        destx = x
 #        desty = y
 
@@ -458,7 +442,7 @@ class Theme:
         src.x,src.y,dest.y = tilew,0,y
         for dest.x in range(x+tilew, xx-tilew*2+tilew, tilew): 
             surf.blit(box,dest,src)
-        
+
         # Render the bottom side
         surf.set_clip(pygame.Rect(x+tilew,yy-tileh,w-tilew*2,tileh))
         src.x,src.y,dest.y = tilew,tileh*2,yy-tileh
@@ -481,15 +465,15 @@ class Theme:
         surf.set_clip()
         src.x,src.y,dest.x,dest.y = 0,0,x,y
         surf.blit(box,dest,src)
-        
+
         # Render the upper-right corner
         src.x,src.y,dest.x,dest.y = tilew*2,0,xx-tilew,y
         surf.blit(box,dest,src)
-        
+
         # Render the lower-left corner
         src.x,src.y,dest.x,dest.y = 0,tileh*2,x,yy-tileh
         surf.blit(box,dest,src)
-        
+
         # Render the lower-right corner
         src.x,src.y,dest.x,dest.y = tilew*2,tileh*2,xx-tilew,yy-tileh
         surf.blit(box,dest,src)

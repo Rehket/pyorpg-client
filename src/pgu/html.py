@@ -68,18 +68,14 @@ class _html(HTMLParser):
     def init(self,doc,font,color,_globals,_locals,loader=None):
         self.mystack = []
         self.document = doc
-        if (loader):
-            self.loader = loader
-        else:
-            # Use the default resource loader
-            self.loader = ResourceLoader()
+        self.loader = loader or ResourceLoader()
         self.myopen('document',self.document)
-        
+
         self.myfont = self.font = font
         self.mycolor = self.color = color
-        
+
         self.form = None
-        
+
         self._globals = _globals
         self._locals = _locals
         
@@ -102,7 +98,7 @@ class _html(HTMLParser):
             if (t == tag):
                 # Found the tag in the stack. Drop everything from that tag onwards
                 # from the stack.
-                self.mystack = self.mystack[0:n]
+                self.mystack = self.mystack[:n]
                 # Pop off the parent element, then add it back on to set the
                 # font, color, etc.
                 # TODO - tacky
@@ -149,13 +145,11 @@ class _html(HTMLParser):
     def do_br(self,attrs): self.item.br(self.font.size(" ")[1])
     def attrs_to_map(self,attrs):
         k = None
-        r = {}
-        for k,v in attrs: r[k] = v
-        return r
+        return dict(attrs)
         
     def map_to_params(self,r):
         anum = re.compile("\D")
-        
+
         params = {'style':{}}
         style = params['style']
 
@@ -164,15 +158,15 @@ class _html(HTMLParser):
         if 'background' in r: 
             style['background'] = self.loader.load_image(r['background'])
         if 'border' in r: style['border'] = int(r['border'])
-            
+
         for k in ['width','height','colspan','rowspan','size','min','max']:
             if k in r: params[k] = int(anum.sub("",r[k]))
-            
+
         for k in ['name','value']:
             if k in r: params[k] = r[k]
-        
+
         if 'class' in r: params['cls'] = r['class']
-        
+
         if 'align' in r: 
             params['align'] = _amap[r['align']]
         if 'valign' in r:
@@ -187,7 +181,7 @@ class _html(HTMLParser):
                     k = k.replace("-","_")
                     k = k.replace(" ","")
                     v = v.replace(" ","")
-                    if k == 'color' or k == 'border_color' or k == 'background':
+                    if k in ['color', 'border_color', 'background']:
                         v = gui.parse_color(v)
                     else:
                         v = int(anum.sub("",v))
@@ -223,8 +217,7 @@ class _html(HTMLParser):
     def start_block(self,t,attrs,align=-1):
         r = self.attrs_to_map(attrs)
         params = self.map_to_params(r)
-        if 'cls' in params: params['cls'] = t+"."+params['cls']
-        else: params['cls'] = t
+        params['cls'] = f'{t}.{params["cls"]}' if 'cls' in params else t
         b = gui.Document(**params)
         b.style.font = self.item.style.font
         if 'align' in params:
@@ -298,14 +291,13 @@ class _html(HTMLParser):
     def _start_td(self,t,attrs):
         r = self.attrs_to_map(attrs)
         params = self.map_to_params(r)
-        if 'cls' in params: params['cls'] = t+"."+params['cls']
-        else: params['cls'] = t
+        params['cls'] = f'{t}.{params["cls"]}' if 'cls' in params else t
         b = gui.Document(cls=t)
-        
+
         self.myback('table')
         self.item.td(b,**params)
         self.myopen(t,b)
-    
+
         self.font = self.item.style.font
         self.color = self.item.style.color
         
@@ -489,15 +481,14 @@ if (sys.version_info[0] >= 3):
     # defines these same functions with an extra argument. So we have to include them
     # conditionally, depending on whether we're using python 2 or 3. Ugh.
     def handle_starttag(this, tag, attrs):
-        func = getattr(this, "start_" + tag, None)
+        func = getattr(this, f'start_{tag}', None)
         if (not func):
             print("ERROR - unrecognized tag %s" % tag)
             return
         func(attrs)
 
     def handle_endtag(this, tag):
-        func = getattr(this, "end_" + tag, None)
-        if (func):
+        if func := getattr(this, f'end_{tag}', None):
             func()
 
     def start_img(this, attrs):
@@ -533,24 +524,20 @@ class HTML(gui.Document):
         # This ensures that the whole HTML document is left-aligned within
         # the rendered surface.
         self.style.align = -1
-        
+
         _globals,_locals = globals,locals
-        
-        if _globals == None: _globals = {}
-        if _locals == None: _locals = {}
+
+        if _globals is None: _globals = {}
+        if _locals is None: _locals = {}
         self._globals = _globals
         self._locals = _locals
-        
+
         #font = gui.theme.get("label","","font")
-        if (htmllib):
-            # The constructor is slightly different
-            p = _html(None, 0)
-        else:
-            p = _html()
+        p = _html(None, 0) if htmllib else _html()
         p.init(self,self.style.font,self.style.color,_globals,_locals,
                loader=loader)
-        p.feed(data) 
-        p.close() 
+        p.feed(data)
+        p.close()
         p.mydone()
         
         

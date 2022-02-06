@@ -190,7 +190,7 @@ class DataHandler():
     def handleNewCharClasses(self, jsonData):
         g.maxClasses = jsonData[0]["maxclasses"]
 
-        for i in range(0, g.maxClasses):
+        for i in range(g.maxClasses):
             Class[i].name = jsonData[i+1]["classname"]
             Class[i].sprite = jsonData[i+1]["sprite"]
 
@@ -209,7 +209,7 @@ class DataHandler():
     def handleClassesData(self, jsonData):
         g.maxClasses = jsonData[0]["maxclasses"]
 
-        for i in range(0, g.maxClasses):
+        for i in range(g.maxClasses):
             Class[i].name = jsonData[i+1]["classname"]
             Class[i].sprite = jsonData[i+1]["sprite"]
 
@@ -372,16 +372,15 @@ class DataHandler():
             return
 
         tickCount = time.time() * 1000
-        if targetType == TARGET_TYPE_PLAYER:
-            for i in range(MAX_SPELLANIM):
+        for i in range(MAX_SPELLANIM):
+            if targetType == TARGET_TYPE_PLAYER:
                 if Player[target].spellAnimations[i].spellNum is None:
                     Player[target].spellAnimations[i].spellNum = spellNum
                     Player[target].spellAnimations[i].timer = tickCount + 120
                     Player[target].spellAnimations[i].framePointer = 0
                     break  
 
-        elif targetType == TARGET_TYPE_NPC:
-            for i in range(MAX_SPELLANIM):
+            elif targetType == TARGET_TYPE_NPC:
                 if mapNPC[target].spellAnimations[i].spellNum is None:
                     mapNPC[target].spellAnimations[i].spellNum = spellNum
                     mapNPC[target].spellAnimations[i].timer = tickCount + 120
@@ -473,11 +472,7 @@ class DataHandler():
 
     def handleMapDone(self):
         # calculate amount of npcs on map
-        g.npcHighIndex = 0
-        for i in range(MAX_MAP_NPCS):
-            if Map.npc[i] != None:
-                g.npcHighIndex += 1
-        
+        g.npcHighIndex = sum(Map.npc[i] != None for i in range(MAX_MAP_NPCS))
         calcTilePositions()
         g.gameEngine.graphicsEngine.redrawMap()
 

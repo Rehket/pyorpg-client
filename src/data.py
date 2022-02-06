@@ -13,29 +13,28 @@ def loadImage(filename):
     return image.convert_alpha()
     
 def loadSlicedSprites(w, h, row, filename):
-    images = []
     masterImage = pygame.image.load(filename).convert_alpha()
-    
+
     masterWidth, masterHeight = masterImage.get_size()
-    
+
     '''for i in xrange(int(masterHeight/h)):
         for j in xrange(int(masterWidth/w)):
             images.append(masterImage.subsurface((j*w, i*h, w, h)))'''
-    
-    for i in xrange(int(masterWidth/w)):
-        images.append(masterImage.subsurface((i*w, row*h , w, h)))
-    
-    return images
+
+    return [
+        masterImage.subsurface((i * w, row * h, w, h))
+        for i in xrange(int(masterWidth / w))
+    ]
 
 def loadTileTable(filename, w, h):
     image = pygame.image.load(filename).convert_alpha()
     imageWidth, imageHeight = image.get_size()
     tileTable = []
-    
-    for tile_x in range(0, imageWidth/w):
+
+    for tile_x in range(imageWidth/w):
         line = []
         tileTable.append(line)
-        for tile_y in range(0, imageHeight/h):
+        for tile_y in range(imageHeight/h):
             rect = (tile_x*w, tile_y*h, w, h)
             line.append(image.subsurface(rect))
     return tileTable
@@ -43,11 +42,13 @@ def loadTileTable(filename, w, h):
 def loadSlicedSprites2(w, h, filename):
     images = []
     masterImage = pygame.image.load(filename).convert_alpha()
-    
+
     masterWidth, masterHeight = masterImage.get_size()
-    
+
     for i in xrange(int(masterHeight/h)):
-        for j in xrange(int(masterWidth/w)):
-            images.append(masterImage.subsurface((j*w, i*h, w, h)))
-    
+        images.extend(
+            masterImage.subsurface((j * w, i * h, w, h))
+            for j in xrange(int(masterWidth / w))
+        )
+
     return images

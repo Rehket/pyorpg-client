@@ -12,12 +12,10 @@ class ResourceManagerClass():
         self.spellSprites = []
 
     def getAmountOfFiles(self, folder, fileExtension):
-        amount = 0
-        for file in os.listdir(g.dataPath + '/' + folder):
-            if file.endswith(fileExtension):
-                amount += 1
-
-        return amount
+        return sum(
+            bool(file.endswith(fileExtension))
+            for file in os.listdir(f'{g.dataPath}/{folder}')
+        )
 
     def loadImage(self, image):
         if image.endswith('.bmp'):
@@ -38,25 +36,34 @@ class ResourceManagerClass():
 
         for i in range(amount):
             try:
-                self.plrSprites.append(self.loadImage(g.dataPath + '/sprites/' + str(i) + '.png'))
+                self.plrSprites.append(
+                    self.loadImage(f'{g.dataPath}/sprites/' + str(i) + '.png')
+                )
+
             except:
                 break
 
     def loadItems(self):
         amount = self.getAmountOfFiles('items', '.png')
-        
+
         for i in range(amount):
             try:
-                self.itemSprites.append(self.loadImage(g.dataPath + '/items/' + str(i) + '.png'))
+                self.itemSprites.append(
+                    self.loadImage(f'{g.dataPath}/items/' + str(i) + '.png')
+                )
+
             except:
                 break
 
     def loadSpells(self):
         amount = self.getAmountOfFiles('spells', '.bmp')
-        
+
         for i in range(amount):
             try:
-                self.spellSprites.append(self.loadImage(g.dataPath + '/spells/' + str(i) + '.bmp'))
+                self.spellSprites.append(
+                    self.loadImage(f'{g.dataPath}/spells/' + str(i) + '.bmp')
+                )
+
 
             except:
                 break

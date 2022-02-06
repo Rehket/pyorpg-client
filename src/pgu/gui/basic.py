@@ -31,7 +31,7 @@ def parse_color(desc):
 def is_color(col):
     # In every version of pygame (up to 1.8.1 so far) will interpret
     # a tuple as a color.
-    if (type(col) == tuple or type(col) == list):
+    if type(col) in [tuple, list]:
         return col
     if (hasattr(pygame, "Color") and type(pygame.Color) == type):
         # This is a recent version of pygame that uses a proper type
@@ -146,14 +146,14 @@ class Image(widget.Widget):
 
         ow,oh = iw,ih = value.get_width(),value.get_height()
         sw,sh = self.style.width,self.style.height
-        
+
         if sw and not sh:
             iw,ih = sw,ih*sw/iw
         elif sh and not sw:
             iw,ih = iw*sh/ih,sh
-        elif sw and sh:
+        elif sw:
             iw,ih = sw,sh
-        
+
         if (ow,oh) != (iw,ih):
             value = pygame.transform.scale(value,(iw,ih))
         self.style.width,self.style.height = iw,ih

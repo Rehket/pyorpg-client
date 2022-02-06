@@ -40,8 +40,7 @@ def ani_load(tv,name,img,size,shape,parts):
     w,h = size
     frames = []
     for y in xrange(0,img.get_height(),h):
-        for x in xrange(0,img.get_width(),w):
-            frames.append(img.subsurface(x,y,w,h))
+        frames.extend(img.subsurface(x,y,w,h) for x in xrange(0,img.get_width(),w))
     _ani_load(tv,name,parts,frames,shape)
     
     

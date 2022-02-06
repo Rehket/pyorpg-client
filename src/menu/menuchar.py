@@ -72,7 +72,10 @@ class characterControl(gui.Table):
 class menuCharacters():
     def __init__(self, surface):
         self.surface = surface
-        self.backgroundImage = pygame.image.load(g.dataPath + '/gui/bg_characterselection.png')
+        self.backgroundImage = pygame.image.load(
+            f'{g.dataPath}/gui/bg_characterselection.png'
+        )
+
 
         # character selection
         self.characters = []
@@ -114,12 +117,13 @@ class menuCharacters():
         # keyboard shortcuts
         self.app.event(event)
 
-        if event.type == KEYDOWN and event.key == K_ESCAPE:
-            g.gameEngine.quitGame()
-            #g.gameState = MENU_LOGIN
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                g.gameEngine.quitGame()
+                #g.gameState = MENU_LOGIN
 
-        elif event.type == KEYDOWN and event.key == K_RETURN:
-            self.doUseChar()
+            elif event.key == K_RETURN:
+                self.doUseChar()
 
     def doUseChar(self):
         if self.charControl.lblPlayerName.value != 'Empty':

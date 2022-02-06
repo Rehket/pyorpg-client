@@ -573,7 +573,11 @@ class NPCEditorGUI():
         # scroll buttons
         # - scroll buttons (place them near self.selectedSpriteRect)
         btnScrollLeft = pygUI.pygButton((600, 146, 32, 32), normal=g.dataPath + '/themes/default/hslider.left.tga')
-        btnScrollRight = pygUI.pygButton((680, 146, 32, 32), normal=g.dataPath + '/themes/default/hslider.right.tga')
+        btnScrollRight = pygUI.pygButton(
+            (680, 146, 32, 32),
+            normal=f'{g.dataPath}/themes/default/hslider.right.tga',
+        )
+
 
         self.scrollButtons = (btnScrollLeft, btnScrollRight)
 

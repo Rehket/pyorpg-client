@@ -39,8 +39,7 @@ class App(container.Container):
         self.set_global_app()
 
         if (not theme):
-            name = os.getenv("PGU_THEME", "").strip()
-            if (name):
+            if name := os.getenv("PGU_THEME", "").strip():
                 # Use the environment variable defined theme
                 self.theme = Theme(name)
             else:
@@ -49,14 +48,14 @@ class App(container.Container):
         else:
             # Use the user-supplied theme
             self.theme = theme
-        
+
         params['decorate'] = 'app'
         container.Container.__init__(self,**params)
         self._quit = False
         self.widget = None
         self._chsize = False
         self._repaint = False
-        
+
         self.screen = None
         self.container = None
 
@@ -160,20 +159,19 @@ class App(container.Container):
             for name in ("buttons", "rel", "button"):
                 if (hasattr(ev, name)):
                     args[name] = getattr(ev, name)
-            
+
             ev = pygame.event.Event(ev.type, args)
 
         #NOTE: might want to deal with ACTIVEEVENT in the future.
         self.send(ev.type, ev)
         container.Container.event(self, ev)
-        if ev.type == MOUSEBUTTONUP:
-            if ev.button not in (4,5): # Ignores the mouse wheel
-                # Also issue a "CLICK" event
-                sub = pygame.event.Event(CLICK,{
-                    'button' : ev.button,
-                    'pos' : ev.pos})
-                self.send(sub.type,sub)
-                container.Container.event(self,sub)
+        if ev.type == MOUSEBUTTONUP and ev.button not in (4, 5):
+            # Also issue a "CLICK" event
+            sub = pygame.event.Event(CLICK,{
+                'button' : ev.button,
+                'pos' : ev.pos})
+            self.send(sub.type,sub)
+            container.Container.event(self,sub)
     
     def loop(self):
         """Performs one iteration of the PGU application loop, which

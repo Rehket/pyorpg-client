@@ -13,294 +13,289 @@ def addText(text, color):
 
 
 def handleMsg(text):
-        msg = text.lower()
+    msg = text.lower()
 
         # broadcast msg
-        if msg[0] == "'":
-            msg = msg[1:len(msg)]
-            if len(msg) > 0:
-                g.tcpConn.broadcastMsg(msg)
-            return
+    if msg[0] == "'":
+        msg = msg[1:]
+        if len(msg) > 0:
+            g.tcpConn.broadcastMsg(msg)
+        return
 
-        # emote msg
-        elif msg[0] == "-":
-            msg = msg[1:len(msg)]
-            if len(msg) > 0:
-                g.tcpConn.emoteMsg(msg)
-            return
+    elif msg[0] == "-":
+        msg = msg[1:]
+        if len(msg) > 0:
+            g.tcpConn.emoteMsg(msg)
+        return
 
-        # player msg
-        elif msg[0] == '!':
-            msg = msg[1:len(msg)]
-            name = msg.split(' ')[0]
+    elif msg[0] == '!':
+        msg = msg[1:]
+        name = msg.split(' ')[0]
 
             # make sure that they are sending something
-            if len(msg.split(' ')[1]) > 0:
-                msg = msg[len(name)+1:len(msg)]
+        if len(msg.split(' ')[1]) > 0:
+            msg = msg[len(name)+1:]
 
-                # send the message to the player
-                g.tcpConn.playerMsg(msg, name)
+            # send the message to the player
+            g.tcpConn.playerMsg(msg, name)
 
-            else:
-                addText(_("Usage: !playername (message)"), alertColor)
+        else:
+            addText(_("Usage: !playername (message)"), alertColor)
 
+        return
+
+    elif msg[0] == '"':
+        if getPlayerAccess(g.myIndex) >= ADMIN_MAPPER:
+            msg = msg[1:]
+            if len(msg) > 0:
+                g.tcpConn.globalMsg(msg)
+        return
+
+    elif msg[0] == "=":
+        if getPlayerAccess(g.myIndex) >= ADMIN_MAPPER:
+            msg = msg[1:]
+            if len(msg) > 0:
+                g.tcpConn.adminMsg(msg)
             return
 
-        # global msg
-        elif msg[0] == '"':
-            if getPlayerAccess(g.myIndex) >= ADMIN_MAPPER:
-                msg = msg[1:len(msg)]
-                if len(msg) > 0:
-                    g.tcpConn.globalMsg(msg)
-            return
+    elif msg[0] == "/":
+        command = msg.split()
 
-        # admin msg
-        elif msg[0] == "=":
-            if getPlayerAccess(g.myIndex) >= ADMIN_MAPPER:
-                msg = msg[1:len(msg)]
-                if len(msg) > 0:
-                    g.tcpConn.adminMsg(msg)
+        if command[0] == "/help":
+            addText(_("Social Commands:"), helpColor)
+            addText(_("  'msghere = Broadcast Message"), helpColor)
+            addText(_("  -msghere = Emote Message"), helpColor)
+            addText(_("  !namehere msghere = Player Message"), helpColor)
+            addText(_("Available Commands: /help, /info, /who, /fps, /inv, /stats, /train, /trade, /party, /join, /leave, /resetui"), helpColor)
+
+        if command[0] == "/info":
+            if len(command) <= 1:
+                addText(_("Usage: /info (name)"), alertColor)
                 return
 
-        # commands
-        elif msg[0] == "/":
-            command = msg.split()
+            if command[1].isdigit():
+                addText(_("Usage: /info (name)"), alertColor)
+                return
 
-            if command[0] == "/help":
-                addText(_("Social Commands:"), helpColor)
-                addText(_("  'msghere = Broadcast Message"), helpColor)
-                addText(_("  -msghere = Emote Message"), helpColor)
-                addText(_("  !namehere msghere = Player Message"), helpColor)
-                addText(_("Available Commands: /help, /info, /who, /fps, /inv, /stats, /train, /trade, /party, /join, /leave, /resetui"), helpColor)
+            g.tcpConn.sendInfoRequest(command[1])
 
-            if command[0] == "/info":
-                if len(command) <= 1:
-                    addText(_("Usage: /info (name)"), alertColor)
-                    return
+        ''' who's online '''
+        if command[0] == "/who":
+            g.tcpConn.sendWhosOnline()
 
-                if command[1].isdigit():
-                    addText(_("Usage: /info (name)"), alertColor)
-                    return
+        ''' show/hide fps '''
+        if command[0] == "/fps":
+            g.boolFPS = not g.boolFPS
 
-                g.tcpConn.sendInfoRequest(command[1])
-
-            ''' who's online '''
-            if command[0] == "/who":
-                g.tcpConn.sendWhosOnline()
-
-            ''' show/hide fps '''
-            if command[0] == "/fps":
-                g.boolFPS = not g.boolFPS
-
-            ''' show inventory '''
-            if command[0] == "/inv":
-                g.gameEngine.graphicsEngine.gameGUI.setUIState(1)  # GUI_INVENTORY = 1
+        ''' show inventory '''
+        if command[0] == "/inv":
+            g.gameEngine.graphicsEngine.gameGUI.setUIState(1)  # GUI_INVENTORY = 1
 
 
-            #################
-            # MONITOR ADMIN #
-            #################
+        #################
+        # MONITOR ADMIN #
+        #################
 
-            ''' shows a list of admin commands '''
-            if command[0] == "/admin":
-                if getPlayerAccess(g.myIndex) < ADMIN_MONITOR:
-                    addText(_("You need to be a high enough staff member to do this!"), alertColor)
-                    return
+        ''' shows a list of admin commands '''
+        if command[0] == "/admin":
+            if getPlayerAccess(g.myIndex) < ADMIN_MONITOR:
+                addText(_("You need to be a high enough staff member to do this!"), alertColor)
+                return
 
-                addText(_("Social Commands:"), helpColor)
-                addText(_('  "msghere = Global Admin Message'), helpColor)
-                addText(_("  =msghere  = Private Admin Message"), helpColor)
-                addText(_("  !namehere msghere = Player Message"), helpColor)
-                addText(_("Available Commands: /admin, /loc, /mapeditor, /warpmeto, /warptome, /warpto, /setsprite, /giveitem, /mapreport, /kick, /ban, /edititem, /respawn, /editnpc, /motd, /editshop, /editspell, /debug"), helpColor)
+            addText(_("Social Commands:"), helpColor)
+            addText(_('  "msghere = Global Admin Message'), helpColor)
+            addText(_("  =msghere  = Private Admin Message"), helpColor)
+            addText(_("  !namehere msghere = Player Message"), helpColor)
+            addText(_("Available Commands: /admin, /loc, /mapeditor, /warpmeto, /warptome, /warpto, /setsprite, /giveitem, /mapreport, /kick, /ban, /edititem, /respawn, /editnpc, /motd, /editshop, /editspell, /debug"), helpColor)
 
-            if command[0] == "/kick":
-                if getPlayerAccess(g.myIndex) < ADMIN_MONITOR:
-                    addText(_("You need to be a high enough staff member to do this!"), alertColor)
-                    return
+        if command[0] == "/kick":
+            if getPlayerAccess(g.myIndex) < ADMIN_MONITOR:
+                addText(_("You need to be a high enough staff member to do this!"), alertColor)
+                return
 
-                if len(command) <= 1:
-                    addText(_("Usage: /kick (name)"), alertColor)
-                    return
+            if len(command) <= 1:
+                addText(_("Usage: /kick (name)"), alertColor)
+                return
 
-                if command[1].isdigit():
-                    addText(_("Usage: /kick (name)"), alertColor)
-                    return
+            if command[1].isdigit():
+                addText(_("Usage: /kick (name)"), alertColor)
+                return
 
-                # sendKick
+            # sendKick
 
-            ################
-            # MAPPER ADMIN #
-            ################
+        ################
+        # MAPPER ADMIN #
+        ################
 
-            ''' displays the current location (x, y, map id) '''
-            if command[0] == "/loc":
-                if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
-                    addText(_("You need to be a high enough staff member to do this!"), alertColor)
-                    return
+        ''' displays the current location (x, y, map id) '''
+        if command[0] == "/loc":
+            if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
+                addText(_("You need to be a high enough staff member to do this!"), alertColor)
+                return
 
-                g.boolLoc = not g.boolLoc
+            g.boolLoc = not g.boolLoc
 
-                # draw location tile
+            # draw location tile
 
-            ''' enables the map editor '''
-            if command[0] == "/mapeditor":
-                if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
-                    addText(_("You need to be a high enough staff member to do this!"), alertColor)
-                    return
+        ''' enables the map editor '''
+        if command[0] == "/mapeditor":
+            if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
+                addText(_("You need to be a high enough staff member to do this!"), alertColor)
+                return
 
-                g.tcpConn.sendRequestEditMap()
+            g.tcpConn.sendRequestEditMap()
 
-            if command[0] == "/warpmeto":
-                if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
-                    addText(_("You need to be a high enough staff member to do this!"), alertColor)
-                    return
+        if command[0] == "/warpmeto":
+            if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
+                addText(_("You need to be a high enough staff member to do this!"), alertColor)
+                return
 
-                if len(command) <= 1:
-                    addText(_("Usage: /warpmeto (name)"), alertColor)
-                    return
+            if len(command) <= 1:
+                addText(_("Usage: /warpmeto (name)"), alertColor)
+                return
 
-                if command[1].isdigit():
-                    addText(_("Usage: /warpmeto (name)"), alertColor)
-                    return
+            if command[1].isdigit():
+                addText(_("Usage: /warpmeto (name)"), alertColor)
+                return
 
-                playerName = command[1]
-                g.tcpConn.warpMeTo(playerName)
+            playerName = command[1]
+            g.tcpConn.warpMeTo(playerName)
 
-            if command[0] == "/warptome":
-                if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
-                    addText(_("You need to be a high enough staff member to do this!"), alertColor)
-                    return
+        if command[0] == "/warptome":
+            if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
+                addText(_("You need to be a high enough staff member to do this!"), alertColor)
+                return
 
-                if len(command) <= 1:
-                    addText(_("Usage: /warptome (name)"), alertColor)
-                    return
+            if len(command) <= 1:
+                addText(_("Usage: /warptome (name)"), alertColor)
+                return
 
-                if command[1].isdigit():
-                    addText(_("Usage: /warptome (name)"), alertColor)
-                    return
+            if command[1].isdigit():
+                addText(_("Usage: /warptome (name)"), alertColor)
+                return
 
-                playerName = command[1]
-                g.tcpConn.warpToMe(playerName)
+            playerName = command[1]
+            g.tcpConn.warpToMe(playerName)
 
-            if command[0] == "/warpto":
-                if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
-                    addText("You need to be a high enough staff member to do this!", alertColor)
-                    return
+        if command[0] == "/warpto":
+            if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
+                addText("You need to be a high enough staff member to do this!", alertColor)
+                return
 
-                if len(command) <= 1:
-                    addText("Usage: /warpto (map #)", alertColor)
-                    return
+            if len(command) <= 1:
+                addText("Usage: /warpto (map #)", alertColor)
+                return
 
-                if not command[1].isdigit():
-                    addText("Usage: /warpto (map #)", alertColor)
-                    return
+            if not command[1].isdigit():
+                addText("Usage: /warpto (map #)", alertColor)
+                return
 
-                n = int(command[1])
+            n = int(command[1])
 
-                if n > 0 and n <= MAX_MAPS:
-                    # warpTo
-                    g.tcpConn.warpTo(n)
-                else:
-                    addText("Invalid map number.", textColor.RED)
+            if n > 0 and n <= MAX_MAPS:
+                # warpTo
+                g.tcpConn.warpTo(n)
+            else:
+                addText("Invalid map number.", textColor.RED)
 
-            ''' sets the admin sprite '''
-            if command[0] == "/setsprite":
-                if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
-                    addText("You need to be a high enough staff member to do this!", alertColor)
-                    return
+        ''' sets the admin sprite '''
+        if command[0] == "/setsprite":
+            if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
+                addText("You need to be a high enough staff member to do this!", alertColor)
+                return
 
-                if len(command) <= 1:
-                    addText("Usage: /setsprite (sprite #)", alertColor)
-                    return
+            if len(command) <= 1:
+                addText("Usage: /setsprite (sprite #)", alertColor)
+                return
 
-                if not command[1].isdigit():
-                    addText("Usage: /setsprite (sprite #)", alertColor)
-                    return
+            if not command[1].isdigit():
+                addText("Usage: /setsprite (sprite #)", alertColor)
+                return
 
-                g.tcpConn.sendSetSprite(int(command[1]))
+            g.tcpConn.sendSetSprite(int(command[1]))
 
-            if command[0] == "/mapreport":
-                if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
-                    addText("You need to be a high enough staff member to do this!", alertColor)
-                    return
+        if command[0] == "/mapreport":
+            if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
+                addText("You need to be a high enough staff member to do this!", alertColor)
+                return
 
-                g.tcpConn.sendMapReport()
+            g.tcpConn.sendMapReport()
 
-            if command[0] == '/respawn':
-                if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
-                    addText("You need to be a high enough staff member to do this!", alertColor)
-                    return
+        if command[0] == '/respawn':
+            if getPlayerAccess(g.myIndex) < ADMIN_MAPPER:
+                addText("You need to be a high enough staff member to do this!", alertColor)
+                return
 
-                g.tcpConn.sendMapRespawn()
+            g.tcpConn.sendMapRespawn()
 
-            ###################
-            # DEVELOPER ADMIN #
-            ###################
+        ###################
+        # DEVELOPER ADMIN #
+        ###################
 
-            ''' enables the map editor '''
-            if command[0] == "/itemeditor":
-                if getPlayerAccess(g.myIndex) < ADMIN_DEVELOPER:
-                    addText("You need to be a high enough staff member to do this!", alertColor)
-                    return
+        ''' enables the map editor '''
+        if command[0] == "/itemeditor":
+            if getPlayerAccess(g.myIndex) < ADMIN_DEVELOPER:
+                addText("You need to be a high enough staff member to do this!", alertColor)
+                return
 
-                g.tcpConn.sendRequestEditItem()
+            g.tcpConn.sendRequestEditItem()
 
-            if command[0] == '/spelleditor':
-                if getPlayerAccess(g.myIndex) < ADMIN_DEVELOPER:
-                    addText("You need to be a high enough staff member to do this!", alertColor)
-                    return
+        if command[0] == '/spelleditor':
+            if getPlayerAccess(g.myIndex) < ADMIN_DEVELOPER:
+                addText("You need to be a high enough staff member to do this!", alertColor)
+                return
 
-                g.tcpConn.sendRequestEditSpell()
+            g.tcpConn.sendRequestEditSpell()
 
-            ''' enables the npc editor '''
-            if command[0] == '/npceditor':
-                if getPlayerAccess(g.myIndex) < ADMIN_DEVELOPER:
-                    addText("You need to be a high enough staff member to do this!", alertColor)
-                    return
+        ''' enables the npc editor '''
+        if command[0] == '/npceditor':
+            if getPlayerAccess(g.myIndex) < ADMIN_DEVELOPER:
+                addText("You need to be a high enough staff member to do this!", alertColor)
+                return
 
-                g.tcpConn.sendRequestEditNpc()
+            g.tcpConn.sendRequestEditNpc()
 
-            ''' gives an item to a player '''
-            if command[0] == '/giveitem':
-                if getPlayerAccess(g.myIndex) < ADMIN_DEVELOPER:
-                    addText("You need to be a high enough staff member to do this!", alertColor)
-                    return
+        ''' gives an item to a player '''
+        if command[0] == '/giveitem':
+            if getPlayerAccess(g.myIndex) < ADMIN_DEVELOPER:
+                addText("You need to be a high enough staff member to do this!", alertColor)
+                return
 
-                if len(command) < 2:
-                    addText('usage: /giveitem <name> <itemnum>', alertColor)
-                    return
+            if len(command) < 2:
+                addText('usage: /giveitem <name> <itemnum>', alertColor)
+                return
 
-                if command[1].isdigit() or not command[2].isdigit():
-                    addText('usage: /giveitem <name> <itemnum>', alertColor)
-                    return
+            if command[1].isdigit() or not command[2].isdigit():
+                addText('usage: /giveitem <name> <itemnum>', alertColor)
+                return
 
-                g.tcpConn.sendGiveItem(command[1], int(command[2]))
+            g.tcpConn.sendGiveItem(command[1], int(command[2]))
 
-            #################
-            # CREATOR ADMIN #
-            #################
+        #################
+        # CREATOR ADMIN #
+        #################
 
-            if command[0] == '/setaccess':
-                if getPlayerAccess(g.myIndex) < ADMIN_CREATOR:
-                    addText("You need to be a high enough staff member to do this!", alertColor)
-                    return
+        if command[0] == '/setaccess':
+            if getPlayerAccess(g.myIndex) < ADMIN_CREATOR:
+                addText("You need to be a high enough staff member to do this!", alertColor)
+                return
 
-                if len(command) < 2:
-                    addText('usage: /setaccess <name> <access>', alertColor)
-                    return
+            if len(command) < 2:
+                addText('usage: /setaccess <name> <access>', alertColor)
+                return
 
-                if command[1].isdigit() or not command[2].isdigit():
-                    addText('usage: /setaccess <name> <access>', alertColor)
-                    return
+            if command[1].isdigit() or not command[2].isdigit():
+                addText('usage: /setaccess <name> <access>', alertColor)
+                return
 
-                g.tcpConn.sendSetAccess(command[1], int(command[2]))
+            g.tcpConn.sendSetAccess(command[1], int(command[2]))
 
-            return
+        return
 
 
-        ''' say message '''
-        if len(text) > 0:
-            g.tcpConn.sayMsg(text)
+    ''' say message '''
+    if len(text) > 0:
+        g.tcpConn.sayMsg(text)
 
 ########
 # GAME #
@@ -328,9 +323,8 @@ def processMovement(index):
         Player[index].xOffset = Player[index].xOffset + movementSpeed
 
     # check if on new tile
-    if Player[index].xOffset == 0:
-        if Player[index].yOffset == 0:
-            Player[index].moving = 0
+    if Player[index].xOffset == 0 and Player[index].yOffset == 0:
+        Player[index].moving = 0
 
 def processNPCMovement(mapNpcNum):
     ''' check if npc is walking and if so, move them '''
@@ -350,29 +344,27 @@ def processNPCMovement(mapNpcNum):
         mapNPC[mapNpcNum].xOffset = mapNPC[mapNpcNum].xOffset + WALK_SPEED
 
     # check if on new tile
-    if mapNPC[mapNpcNum].xOffset == 0:
-        if mapNPC[mapNpcNum].yOffset == 0:
-            mapNPC[mapNpcNum].moving = 0
+    if mapNPC[mapNpcNum].xOffset == 0 and mapNPC[mapNpcNum].yOffset == 0:
+        mapNPC[mapNpcNum].moving = 0
 
 
 def isTryingToMove():
-    if g.inpDIR_UP or g.inpDIR_DOWN or g.inpDIR_LEFT or g.inpDIR_RIGHT:
-        return True
-    else:
-        return False
+    return bool(g.inpDIR_UP or g.inpDIR_DOWN or g.inpDIR_LEFT or g.inpDIR_RIGHT)
 
 def checkAttack():
     if g.inpCTRL == True:
         tickCount = time.time() * 1000
-        if Player[g.myIndex].attackTimer + 1000 < tickCount:
-            if Player[g.myIndex].attacking == 0:
-                Player[g.myIndex].attacking = 1
-                Player[g.myIndex].attackTimer = tickCount
+        if (
+            Player[g.myIndex].attackTimer + 1000 < tickCount
+            and Player[g.myIndex].attacking == 0
+        ):
+            Player[g.myIndex].attacking = 1
+            Player[g.myIndex].attackTimer = tickCount
 
-                g.tcpConn.sendPlayerAttack()
+            g.tcpConn.sendPlayerAttack()
 
-                # play attack sound
-                g.soundEngine.playAttack()
+            # play attack sound
+            g.soundEngine.playAttack()
 
 def canMove():
     d = getPlayerDir(g.myIndex)
@@ -474,51 +466,52 @@ def checkDirection(direction):
     if Map.tile[x][y].type == TILE_TYPE_BLOCKED:
         return True
 
-    # check if player is on tile
-    for i in range(len(g.playersOnMap)):
-        if getPlayerX(g.playersOnMap[i]) == x:
-            if getPlayerY(g.playersOnMap[i]) == y:
-                return True
-
-    # check if npc is already on tile
-    for i in range(MAX_MAP_NPCS):
-        if mapNPC[i].num != None:
-            if mapNPC[i].x == x and mapNPC[i].y == y:
-                return True
-
-    return False
+    return next(
+        (
+            True
+            for i in range(len(g.playersOnMap))
+            if getPlayerX(g.playersOnMap[i]) == x
+            and getPlayerY(g.playersOnMap[i]) == y
+        ),
+        any(
+            mapNPC[i].num != None and mapNPC[i].x == x and mapNPC[i].y == y
+            for i in range(MAX_MAP_NPCS)
+        ),
+    )
 
 def checkMovement():
-    if isTryingToMove():
-        if canMove():
-            Player[g.myIndex].moving = MOVING_WALKING
+    if isTryingToMove() and canMove():
+        Player[g.myIndex].moving = MOVING_WALKING
 
-            direction = getPlayerDir(g.myIndex)
+        direction = getPlayerDir(g.myIndex)
 
-            if direction == DIR_UP:
-                g.tcpConn.sendPlayerMove()
-                Player[g.myIndex].yOffset = PIC_Y
-                setPlayerY(g.myIndex, getPlayerY(g.myIndex) - 1)
+        if direction == DIR_UP:
+            g.tcpConn.sendPlayerMove()
+            Player[g.myIndex].yOffset = PIC_Y
+            setPlayerY(g.myIndex, getPlayerY(g.myIndex) - 1)
 
-            if direction == DIR_DOWN:
-                g.tcpConn.sendPlayerMove()
-                Player[g.myIndex].yOffset = -PIC_Y
-                setPlayerY(g.myIndex, getPlayerY(g.myIndex) + 1)
+        if direction == DIR_DOWN:
+            g.tcpConn.sendPlayerMove()
+            Player[g.myIndex].yOffset = -PIC_Y
+            setPlayerY(g.myIndex, getPlayerY(g.myIndex) + 1)
 
-            if direction == DIR_LEFT:
-                g.tcpConn.sendPlayerMove()
-                Player[g.myIndex].xOffset = PIC_X
-                setPlayerX(g.myIndex, getPlayerX(g.myIndex) - 1)
+        if direction == DIR_LEFT:
+            g.tcpConn.sendPlayerMove()
+            Player[g.myIndex].xOffset = PIC_X
+            setPlayerX(g.myIndex, getPlayerX(g.myIndex) - 1)
 
-            if direction == DIR_RIGHT:
-                g.tcpConn.sendPlayerMove()
-                Player[g.myIndex].xOffset = -PIC_X
-                setPlayerX(g.myIndex, getPlayerX(g.myIndex) + 1)
+        if direction == DIR_RIGHT:
+            g.tcpConn.sendPlayerMove()
+            Player[g.myIndex].xOffset = -PIC_X
+            setPlayerX(g.myIndex, getPlayerX(g.myIndex) + 1)
 
-            if Player[g.myIndex].xOffset == 0:
-                if Player[g.myIndex].yOffset == 0:
-                    if Map.tile[getPlayerX(g.myIndex)][getPlayerY(g.myIndex)].type == TILE_TYPE_WARP:
-                        g.gettingMap = True
+        if (
+            Player[g.myIndex].xOffset == 0
+            and Player[g.myIndex].yOffset == 0
+            and Map.tile[getPlayerX(g.myIndex)][getPlayerY(g.myIndex)].type
+            == TILE_TYPE_WARP
+        ):
+            g.gettingMap = True
 
     if Map.tile[getPlayerX(g.myIndex)][getPlayerY(g.myIndex)].type == TILE_TYPE_WARP:
         #print "cannot move (todo)"
@@ -526,11 +519,13 @@ def checkMovement():
 
 
 def checkMapGetItem():
-    if time.time() * 1000 > Player[g.myIndex].mapGetTimer + 250:
-        # todo: check if chat is empty
-        if g.gameEngine.graphicsEngine.gameGUI.guiContainer.chatCtrl.chatMsg.value == '':
-            Player[g.myIndex].mapGetTimer = time.time() * 1000
-            g.tcpConn.sendMapGetItem()
+    if (
+        time.time() * 1000 > Player[g.myIndex].mapGetTimer + 250
+        and g.gameEngine.graphicsEngine.gameGUI.guiContainer.chatCtrl.chatMsg.value
+        == ''
+    ):
+        Player[g.myIndex].mapGetTimer = time.time() * 1000
+        g.tcpConn.sendMapGetItem()
 
 
 def updateInventory():
@@ -538,12 +533,11 @@ def updateInventory():
     print "todo"
 
 def getPlayersOnMap():
-    g.playersOnMap = []
-
-    for i in range(0, len(Player)):
-        if isPlaying(i):
-            if getPlayerMap(i) == getPlayerMap(g.myIndex):
-                g.playersOnMap.append(i)
+    g.playersOnMap = [
+        i
+        for i in range(len(Player))
+        if isPlaying(i) and getPlayerMap(i) == getPlayerMap(g.myIndex)
+    ]
 
 
 def castSpell(spellNum):
@@ -574,9 +568,11 @@ def castSpell(spellNum):
         addText(_('No spell here.'), textColor.BRIGHT_RED)
 
 def setSpellbookHotkey(slotNum, key):
-    if key in g.SPELLBOOK_HOTKEYS:
-        if slotNum not in g.SPELLBOOK_HOTKEYS.values():
-            g.SPELLBOOK_HOTKEYS[key] = slotNum
+    if (
+        key in g.SPELLBOOK_HOTKEYS
+        and slotNum not in g.SPELLBOOK_HOTKEYS.values()
+    ):
+        g.SPELLBOOK_HOTKEYS[key] = slotNum
 
 def getSpellbookHotkey(key):
     if key in g.SPELLBOOK_HOTKEYS:
@@ -586,23 +582,25 @@ def getSpellbookHotkey(key):
 
 def findTarget(x, y):
     # check for player
-    for i in range(0, len(g.playersOnMap)):
-        if getPlayerMap(g.myIndex) == getPlayerMap(g.playersOnMap[i]):
-            if getPlayerX(g.playersOnMap[i]) == x and getPlayerY(g.playersOnMap[i]) == y:
-                if g.playersOnMap[i] != g.myIndex:
-                    # change target
-                    g.target = g.playersOnMap[i]
-                    g.targetType = TARGET_TYPE_PLAYER
-                    break
+    for i in range(len(g.playersOnMap)):
+        if (
+            getPlayerMap(g.myIndex) == getPlayerMap(g.playersOnMap[i])
+            and getPlayerX(g.playersOnMap[i]) == x
+            and getPlayerY(g.playersOnMap[i]) == y
+            and g.playersOnMap[i] != g.myIndex
+        ):
+            # change target
+            g.target = g.playersOnMap[i]
+            g.targetType = TARGET_TYPE_PLAYER
+            break
 
     # check for npc
-    for i in range(0, MAX_MAP_NPCS):
-        if mapNPC[i].num is not None:
-            if mapNPC[i].x == x and mapNPC[i].y == y:
-                # change target
-                g.target = i
-                g.targetType = TARGET_TYPE_NPC
-                break
+    for i in range(MAX_MAP_NPCS):
+        if mapNPC[i].num is not None and mapNPC[i].x == x and mapNPC[i].y == y:
+            # change target
+            g.target = i
+            g.targetType = TARGET_TYPE_NPC
+            break
 
     if g.targetType != TARGET_TYPE_NONE:
         g.tcpConn.sendTarget(x, y)
@@ -646,11 +644,7 @@ def calcTilePositions():
 
 def initMapData():
     # calculate amount of npcs on map
-    g.npcHighIndex = 0
-    for i in range(MAX_MAP_NPCS):
-        if Map.npc[i] != None:
-            g.npcHighIndex += 1
-
+    g.npcHighIndex = sum(Map.npc[i] != None for i in range(MAX_MAP_NPCS))
     calcTilePositions()
 
 # should be in clienttcp.bas

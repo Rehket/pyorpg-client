@@ -5,12 +5,12 @@ from constants import MAX_MAP_ITEMS, MAX_MAP_NPCS
 
 
 def saveMap(mapNum):
-    pickle.dump(Map, open(g.dataPath + "/maps/" + str(mapNum) + ".pom", 'wb'))
+    pickle.dump(Map, open(f'{g.dataPath}/maps/' + str(mapNum) + ".pom", 'wb'))
 
 
 def loadMap(mapNum):
     global Map
-    Map = pickle.load(open(g.dataPath + "/maps/" + str(mapNum) + ".pom", 'rb'))
+    Map = pickle.load(open(f'{g.dataPath}/maps/' + str(mapNum) + ".pom", 'rb'))
 
 
 def clearPlayer(index):
