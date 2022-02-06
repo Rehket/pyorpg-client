@@ -24,7 +24,7 @@ class Keysym(widget.Widget):
     
     def event(self,e):
         used = None
-        if e.type == FOCUS or e.type == BLUR: self.repaint()
+        if e.type in [FOCUS, BLUR]: self.repaint()
         elif e.type == KEYDOWN:
             if e.key != K_TAB:
                 self.value = e.key
@@ -39,9 +39,8 @@ class Keysym(widget.Widget):
     def paint(self,s):
         r = pygame.rect.Rect(0,0,self.rect.w,self.rect.h)
         #render_box(s,self.style.background,r)
-        if self.value == None: return
-        name = ""
-        for p in pygame.key.name(self.value).split(): name += p.capitalize()+" "
+        if self.value is None: return
+        name = "".join(p.capitalize()+" " for p in pygame.key.name(self.value).split())
         #r.x = self.style.padding_left;
         #r.y = self.style.padding_bottom;
         s.blit(self.style.font.render(name, 1, self.style.color), r)

@@ -42,29 +42,24 @@ class TextArea(widget.Widget):
         
         # TODO: What's up with this 20 magic number? It's the margin of the left and right sides, but I'm not sure how this should be gotten other than by trial and error.
         max_line_w = self.rect.w - 20
-                
+
         # Update the line allocation for the box's value
         self.doLines(max_line_w)
-        
+
         # Make sure that the vpos and hpos of the cursor is set properly
         self.updateCursorPos()
 
         # Make sure that we're scrolled vertically such that the cursor is visible
-        if (self.vscroll < 0):
-            self.vscroll = 0
+        self.vscroll = max(self.vscroll, 0)
         if (self.vpos < self.vscroll):
             self.vscroll = self.vpos
         elif ((self.vpos - self.vscroll + 1) * self.line_h > self.rect.h):
             self.vscroll = - (self.rect.h / self.line_h - self.vpos - 1)
 
-        # Blit each of the lines in turn
-        cnt = 0
-        for line in self.lines:
+        for cnt, line in enumerate(self.lines):
             line_pos = (0, (cnt - self.vscroll) * self.line_h)
             if (line_pos[1] >= 0) and (line_pos[1] < self.rect.h):
                 s.blit( self.font.render(line, 1, self.style.color), line_pos )
-            cnt += 1
-        
         # If the textarea is focused, then also show the cursor
         if self.container.myfocus is self:
             r = self.getCursorRect()
@@ -101,10 +96,14 @@ class TextArea(widget.Widget):
     def getCursorRect(self):
         lw = 0
         if (len(self.lines) > 0):
-            lw, lh = self.font.size( self.lines[ self.vpos ][ 0:self.hpos ] )
-            
-        r = pygame.Rect(lw, (self.vpos - self.vscroll) * self.line_h, self.cursor_w, self.line_h)
-        return r
+            lw, lh = self.font.size(self.lines[ self.vpos ][:self.hpos])
+
+        return pygame.Rect(
+            lw,
+            (self.vpos - self.vscroll) * self.line_h,
+            self.cursor_w,
+            self.line_h,
+        )
     
     # This function sets the cursor position according to an x/y value (such as by from a mouse click)
     def setCursorByXY(self, pos):
@@ -112,19 +111,19 @@ class TextArea(widget.Widget):
         self.vpos = ((int) (y / self.line_h)) + self.vscroll
         if (self.vpos >= len(self.lines)):
             self.vpos = len(self.lines) - 1
-            
+
         currentLine = self.lines[ self.vpos ]
-        
-        for cnt in range(0, len(currentLine) ):
+
+        for cnt in range(len(currentLine)):
             self.hpos = cnt
-            lw, lh = self.font.size( currentLine[ 0:self.hpos + 1 ] )
+            lw, lh = self.font.size(currentLine[:self.hpos + 1])
             if (lw > x):
                 break
-        
+
         lw, lh = self.font.size( currentLine )
         if (lw < x):
             self.hpos = len(currentLine)
-            
+
         self.setCursorByHVPos()
         
     # This function sets the cursor position by the horizontal/vertical cursor position.    
@@ -153,7 +152,7 @@ class TextArea(widget.Widget):
     def doLines(self, max_line_w):
         self.line_h = 10
         self.lines = [] # Create an empty starter list to start things out.
-        
+
         inx = 0
         line_start = 0
         while inx >= 0:
@@ -162,40 +161,36 @@ class TextArea(widget.Widget):
             prev_word_start = inx # Store the previous whitespace
             spc_inx = self.value.find(' ', inx+1)
             nl_inx = self.value.find('\n', inx+1)
-            
+
             if (min(spc_inx, nl_inx) == -1):
                 inx = max(spc_inx, nl_inx)
             else:
                 inx = min(spc_inx, nl_inx)
-                
+
             # Measure the current line
             lw, self.line_h = self.font.size( self.value[ line_start : inx ] )
-            
+
             # If we exceeded the max line width, then create a new line
             if (lw > max_line_w):
                 #Fall back to the previous word start
                 self.lines.append(self.value[ line_start : prev_word_start + 1 ])
                 line_start = prev_word_start + 1
                 # TODO: Check for extra-long words here that exceed the length of a line, to wrap mid-word
-                
+
             # If we reached the end of our text
             if (inx < 0):
                 # Then make sure we added the last of the line
                 if (line_start < len( self.value ) ):
-                    self.lines.append( self.value[ line_start : len( self.value ) ] )
+                    self.lines.append(self.value[line_start:])
                 else:
                     self.lines.append('')
-            # If we reached a hard line break
             elif (self.value[inx] == "\n"):
                 # Then make a line break here as well.
                 newline = self.value[ line_start : inx + 1 ]
                 newline = newline.replace("\n", " ") # HACK: We know we have a newline character, which doesn't print nicely, so make it into a space. Comment this out to see what I mean.
                 self.lines.append( newline )
-                
+
                 line_start = inx + 1
-            else:
-                # Otherwise, we just continue progressing to the next space
-                pass
         
     def _setvalue(self,v):
         self.__dict__['value'] = v
@@ -224,21 +219,14 @@ class TextArea(widget.Widget):
                     self.pos = newPos
             elif e.key == K_LEFT:
                 if self.pos > 0: self.pos -= 1
-#                used = True
             elif e.key == K_RIGHT:
                 if self.pos < len(self.value): self.pos += 1
-#                used = True
             elif e.key == K_UP:
                 self.vpos -= 1
                 self.setCursorByHVPos()
             elif e.key == K_DOWN:
                 self.vpos += 1
                 self.setCursorByHVPos()
-            # The following return/tab keys are standard for PGU widgets, but I took them out here to facilitate multi-line text editing
-#            elif e.key == K_RETURN:
-#                self.next()
-#            elif e.key == K_TAB:
-#                pass                
             else:
                 #c = str(e.unicode)
                 used = None
@@ -248,10 +236,7 @@ class TextArea(widget.Widget):
                     elif (e.key == K_TAB):
                         c = "  "
                     else:
-                        if (type(e.unicode) == str):
-                            c = e.unicode
-                        else:
-                            c = (e.unicode).encode('latin-1')
+                        c = e.unicode if (type(e.unicode) == str) else (e.unicode).encode('latin-1')
                     if c:
                         used = True
                         self._setvalue(self.value[:self.pos] + c + self.value[self.pos:])
@@ -262,20 +247,17 @@ class TextArea(widget.Widget):
         elif e.type == MOUSEBUTTONDOWN:
             self.setCursorByXY(e.pos)
             self.repaint()
-            
-        elif e.type == FOCUS:
+
+        elif e.type in [FOCUS, BLUR]:
             self.repaint()
-        elif e.type == BLUR:
-            self.repaint()
-        
         self.pcls = ""
         if self.container.myfocus is self: self.pcls = "focus"
-        
+
         return used
     
     def __setattr__(self,k,v):
         if k == 'value':
-            if v == None: v = ''
+            if v is None: v = ''
             v = str(v)
             self.pos = len(v)
         _v = self.__dict__.get(k,NOATTR)

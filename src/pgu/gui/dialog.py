@@ -29,16 +29,16 @@ class Dialog(table.Table):
         """        
         params.setdefault('cls','dialog')
         table.Table.__init__(self,**params)
-        
-        
+
+
         self.tr()
         self.td(title,align=-1,cls=self.cls+'.bar')
         clos = button.Icon(self.cls+".bar.close")
-        clos.connect(CLICK,self.close,None) 
-        self.td(clos,align=1,cls=self.cls+'.bar')
-        
+        clos.connect(CLICK,self.close,None)
+        self.td(clos, align=1, cls=f'{self.cls}.bar')
+
         self.tr()
-        self.td(main,colspan=2,cls=self.cls+".main")
+        self.td(main, colspan=2, cls=f'{self.cls}.main')
         
         
 #         self.tr()
@@ -75,15 +75,16 @@ class FileDialog(Dialog):
         """
 
         cls1 = "filedialog"
-        if not path: self.curdir = os.getcwd()
-        else: self.curdir = path
+        self.curdir = os.getcwd() if not path else path
         self.dir_img = basic.Image(
-            pguglobals.app.theme.get(cls1+".folder", "", 'image'))
+            pguglobals.app.theme.get(f'{cls1}.folder', "", 'image')
+        )
+
         td_style = {'padding_left': 4,
                     'padding_right': 4,
                     'padding_top': 2,
                     'padding_bottom': 2}
-        self.title = basic.Label(title_txt, cls=cls+".title.label")
+        self.title = basic.Label(title_txt, cls=f'{cls}.title.label')
         self.body = table.Table()
         self.list = area.List(width=350, height=150)
         self.input_dir = input.Input()
@@ -143,14 +144,14 @@ class FileDialog(Dialog):
 
 
     def _button_okay_clicked_(self, arg):
-        if self.input_dir.value != self.curdir:
-            if os.path.isdir(self.input_dir.value):
-                self.input_file.value = ""
-                self.curdir = os.path.abspath(self.input_dir.value)
-                self.list.clear()
-                self._list_dir_()
-        else:
+        if self.input_dir.value == self.curdir:
             self.value = os.path.join(self.curdir, self.input_file.value)
             self.send(CHANGE)
             self.close()
+
+        elif os.path.isdir(self.input_dir.value):
+            self.input_file.value = ""
+            self.curdir = os.path.abspath(self.input_dir.value)
+            self.list.clear()
+            self._list_dir_()
 

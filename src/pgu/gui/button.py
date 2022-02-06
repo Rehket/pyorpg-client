@@ -20,7 +20,7 @@ class _button(widget.Widget):
         elif e.type == FOCUS: self.repaint()
         elif e.type == BLUR: self.repaint()
         elif e.type == KEYDOWN:
-            if e.key == K_SPACE or e.key == K_RETURN:
+            if e.key in [K_SPACE, K_RETURN]:
                 self.state = 1
                 self.repaint()
         elif e.type == MOUSEBUTTONDOWN: 
@@ -33,7 +33,7 @@ class _button(widget.Widget):
                 self._event(sub)
                 #self.event(sub)
                 #self.click()
-            
+
             self.state = 0
             self.repaint()
         elif e.type == MOUSEBUTTONUP:
@@ -41,7 +41,7 @@ class _button(widget.Widget):
             self.repaint()
         elif e.type == CLICK:
             self.click()
-        
+
         self.pcls = ""
         if self.state == 0 and self.is_hovering():
             self.pcls = "hover"
@@ -84,7 +84,7 @@ class Button(_button):
             params = {}
             if (self.style.font):
                 params["font"] = self.style.font
-            val = basic.Label(val, cls=self.cls+".label", **params)
+            val = basic.Label(val, cls=f'{self.cls}.label', **params)
             val.container = self
 
         oldval = self._value
@@ -126,8 +126,7 @@ class Switch(_button):
     def paint(self,s):
         #self.pcls = ""
         #if self.container.myhover is self: self.pcls = "hover"
-        if self.value: img = self.style.on
-        else: img = self.style.off
+        img = self.style.on if self.value else self.style.off
         s.blit(img,(0,0))
     
     @property
@@ -180,10 +179,10 @@ class Checkbox(_button):
         _button.__init__(self,**params)
         self.group = group
         self.group.add(self)
-        if self.group.value == None:
+        if self.group.value is None:
             self.group.value = []
         self.value = value
-        
+
         img = self.style.off
         self.style.width = img.get_width()
         self.style.height = img.get_height()
@@ -191,9 +190,7 @@ class Checkbox(_button):
     def paint(self,s):
         #self.pcls = ""
         #if self.container.myhover is self: self.pcls = "hover"
-        if self.value in self.group.value: img = self.style.on
-        else: img = self.style.off
-        
+        img = self.style.on if self.value in self.group.value else self.style.off
         s.blit(img,(0,0))
     
     def click(self):
@@ -244,8 +241,7 @@ class Radio(_button):
     def paint(self,s):
         #self.pcls = ""
         #if self.container.myhover is self: self.pcls = "hover"
-        if self.group.value == self.value: img = self.style.on
-        else: img = self.style.off
+        img = self.style.on if self.group.value == self.value else self.style.off
         s.blit(img,(0,0))
     
     def click(self):

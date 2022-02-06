@@ -119,9 +119,8 @@ class Widget(object):
 
     def focus(self):
         """Focus this Widget."""
-        if self.container: 
-            if self.container.myfocus != self:  ## by Gal Koren
-                self.container.focus(self)
+        if self.container and self.container.myfocus != self:
+            self.container.focus(self)
 
     def blur(self): 
         """Blur this Widget."""
@@ -144,9 +143,7 @@ class Widget(object):
 
     def is_hovering(self):
         """Returns true if the mouse is hovering over this widget."""
-        if self.container:
-            return (self.container.myhover is self)
-        return False
+        return (self.container.myhover is self) if self.container else False
 
     def resize(self,width=None,height=None):
         """Resize this widget and all sub-widgets, returning the new size.
@@ -252,7 +249,7 @@ class Widget(object):
             w.connect(gui.CLICK,onclick,'PGU Button Clicked')
 
         """
-        if (not code in self.connects):
+        if code not in self.connects:
             self.connects[code] = []
         for cb in self.connects[code]:
             if (cb.func == func):
@@ -268,7 +265,7 @@ class Widget(object):
     # only those handlers will be removed. If func is None, all handlers
     # will be removed.
     def disconnect(self, code, func=None):
-        if (not code in self.connects):
+        if code not in self.connects:
             return
         if (not func):
             # Remove all signal handlers
@@ -286,7 +283,7 @@ class Widget(object):
 
     def send(self,code,event=None):
         """Send a code, event callback trigger."""
-        if (not code in self.connects):
+        if code not in self.connects:
             return
         # Trigger all connected signal handlers
         for cb in self.connects[code]:
@@ -307,11 +304,11 @@ class Widget(object):
             if (hasattr(func, "__self__") and hasattr(func.__self__, "__class__") or 
                 hasattr(func,'im_class')): 
                 names.pop(0)
-            
+
             args = []
             magic = {'_event':event,'_code':code,'_widget':self}
             for name in names:
-                if name in magic.keys():
+                if name in magic:
                     args.append(magic[name])
                 elif len(values):
                     args.append(values.pop(0))

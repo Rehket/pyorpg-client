@@ -289,7 +289,7 @@ class ItemEditorContainer(gui.Container):
     def saveItem(self, value):
         typeValue = self.value['selItemType'].value
 
-        if self.itemNum == None:
+        if self.itemNum is None:
             # if it's a new item then find a new item id to use
             for i in range(len(Item)):
                 if Item[i].name == '':
@@ -364,7 +364,11 @@ class ItemEditorGUI():
         # scroll buttons
         # - scroll buttons (place them near self.selectedSpriteRect)
         btnScrollLeft = pygUI.pygButton((600, 88, 32, 32), normal=g.dataPath + '/themes/default/hslider.left.tga')
-        btnScrollRight = pygUI.pygButton((680, 88, 32, 32), normal=g.dataPath + '/themes/default/hslider.right.tga')
+        btnScrollRight = pygUI.pygButton(
+            (680, 88, 32, 32),
+            normal=f'{g.dataPath}/themes/default/hslider.right.tga',
+        )
+
 
         self.scrollButtons = (btnScrollLeft, btnScrollRight)
 

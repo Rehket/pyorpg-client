@@ -45,7 +45,7 @@ class Sprite:
         if not isinstance(ishape, tuple):
             ishape = ishape,None
         image,shape = ishape
-        if shape == None:
+        if shape is None:
             shape = pygame.Rect(0,0,image.get_width(),image.get_height())
         if isinstance(shape, tuple): shape = pygame.Rect(shape)
         self.image = image
@@ -71,7 +71,7 @@ class Sprite:
         if not isinstance(ishape, tuple):
             ishape = ishape,None
         image,shape = ishape
-        if shape == None:
+        if shape is None:
             shape = pygame.Rect(0,0,image.get_width(),image.get_height())
         if isinstance(shape, tuple):
             shape = pygame.Rect(shape)
@@ -139,7 +139,7 @@ class Vid:
     """
     
     def __init__(self):
-        self.tiles = [None for x in xrange(0,256)]
+        self.tiles = [None for _ in xrange(0,256)]
         self.sprites = _Sprites()
         self.images = {} #just a store for images.
         self.layers = None
@@ -162,18 +162,20 @@ class Vid:
         """
         self.size = size
         w,h = size
-        self.layers = [[[0 for x in xrange(0,w)] for y in xrange(0,h)]
-            for z in xrange(0,4)]
+        self.layers = [
+            [[0 for _ in xrange(0, w)] for _ in xrange(0, h)] for _ in xrange(0, 4)
+        ]
+
         self.tlayer = self.layers[0]
         self.blayer = self.layers[1]
         if not bg: self.blayer = None
         self.clayer = self.layers[2]
         self.alayer = self.layers[3]
-        
+
         self.view.x, self.view.y = 0,0
         self._view.x, self.view.y = 0,0
         self.bounds = None
-        
+
         self.updates = []
     
     def set(self,pos,v):
@@ -234,12 +236,11 @@ class Vid:
             bg        -- set to 1 if you wish to load the background layer
 
         """
-        if type(fname) == str: img = pygame.image.load(fname)
-        else: img = fname
+        img = pygame.image.load(fname) if type(fname) == str else fname
         w,h = img.get_width(),img.get_height()
         self.resize((w,h),bg)
-        for y in range(0,h):
-            for x in range(0,w):
+        for y in range(h):
+            for x in range(w):
                 t,b,c,_a = img.get_at((x,y))
                 self.tlayer[y][x] = t
                 if bg: self.blayer[y][x] = b
@@ -255,14 +256,12 @@ class Vid:
         w,h = self.size
         img = pygame.Surface((w,h),SWSURFACE,32)
         img.fill((0,0,0,0))
-        for y in range(0,h):
-            for x in range(0,w):
+        _a = 0
+        for y in range(h):
+            for x in range(w):
                 t = self.tlayer[y][x]
-                b = 0
-                if self.blayer:
-                    b = self.blayer[y][x]
+                b = self.blayer[y][x] if self.blayer else 0
                 c = self.clayer[y][x]
-                _a = 0
                 img.set_at((x,y),(t,b,c,_a))
         pygame.image.save(img,fname)
                 
@@ -279,10 +278,9 @@ class Vid:
 
         """
         TW,TH = size
-        if type(fname) == str: img = pygame.image.load(fname).convert_alpha()
-        else: img = fname
+        img = pygame.image.load(fname).convert_alpha() if type(fname) == str else fname
         w,h = img.get_width(),img.get_height()
-        
+
         n = 0
         for y in range(0,h,TH):
             for x in range(0,w,TW):
@@ -333,13 +331,12 @@ class Vid:
         
     def string2groups(self,str):
         """Convert a string to groups."""
-        if str == None: return 0
-        return self.list2groups(str.split(","))
+        return 0 if str is None else self.list2groups(str.split(","))
 
     def list2groups(self,igroups):
         """Convert a list to groups."""
         for s in igroups:
-            if not s in self.groups:
+            if s not in self.groups:
                 self.groups[s] = 2**len(self.groups)
         v = 0
         for s,n in self.groups.items():
@@ -348,10 +345,7 @@ class Vid:
 
     def groups2list(self,groups):
         """Convert a groups to a list."""
-        v = []
-        for s,n in self.groups.items():
-            if (n&groups)!=0: v.append(s)
-        return v
+        return [s for s,n in self.groups.items() if (n&groups)!=0]
 
     def hit(self,x,y,t,s):
         tiles = self.tiles
@@ -471,10 +465,8 @@ class Vid:
 
     def loop_spritehits(self):
         as_ = self.sprites[:]
-        
-        groups = {}
-        for n in range(0,31):
-            groups[1<<n] = []
+
+        groups = {1<<n: [] for n in range(31)}
         for s in as_:
             g = s.groups
             n = 1
@@ -482,7 +474,7 @@ class Vid:
                 if (g&1)!=0: groups[n].append(s)
                 g >>= 1
                 n <<= 1
-                
+
         for s in as_:
             if s.agroups!=0:
                 rect1,rect2 = s.rect,Rect(s.rect)

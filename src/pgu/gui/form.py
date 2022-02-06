@@ -51,12 +51,10 @@ class Form(widget.Widget):
     def _clean(self):
         # Remove elements from our list if they no longer have an assigned name
         for e in self._elist[:]:
-            if not hasattr(e,'name') or e.name == None:
+            if not hasattr(e, 'name') or e.name is None:
                 self._elist.remove(e)
         # Update the name-to-widget mapping
-        self._emap = {}
-        for e in self._elist:
-            self._emap[e.name] = e
+        self._emap = {e.name: e for e in self._elist}
         self._dirty = 0
     
     def __getitem__(self,k):
@@ -73,14 +71,9 @@ class Form(widget.Widget):
     def results(self):
         """Return a dict of name, widget-value pairs."""
         if self._dirty: self._clean()
-        r = {}
-        for e in self._elist:
-            # Make sure the widget has a 'value' (eg tables do not)
-            if (hasattr(e, "value")):
-                r[e.name] = e.value
-            else:
-                r[e.name] = None
-        return r
+        return {
+            e.name: e.value if (hasattr(e, "value")) else None for e in self._elist
+        }
     
     def items(self):
         """Return a list of name, widget pairs."""

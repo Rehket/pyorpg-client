@@ -68,11 +68,7 @@ class ChatControl(gui.Table):
 
         def clickChatMsg(value):
             # disable movement when chat msg is mouse clicked
-            if self.focused:
-                self.focused = False
-            else:
-                self.focused = True
-
+            self.focused = not self.focused
             g.canMoveNow = False
 
         self.tr()
@@ -103,12 +99,11 @@ class ChatControl(gui.Table):
     def lkey(self, _event):
         e = _event
 
-        if e.key == K_RETURN:
-            if self.chatMsg.value != '':
-                handleMsg(self.chatMsg.value)
-                self.chatMsg.value = ''
+        if e.key == K_RETURN and self.chatMsg.value != '':
+            handleMsg(self.chatMsg.value)
+            self.chatMsg.value = ''
 
-                g.canMoveNow = True
+            g.canMoveNow = True
 
     def addText(self, text, color=(0, 0, 0)):
         def write(text, color):
@@ -306,7 +301,7 @@ class GameGUI():
         self.graphicsEngine = graphicsEngine
         self.state = GUI_STATS
 
-        self.background = pygame.image.load(g.dataPath + '/gui/bg_ingame.png')
+        self.background = pygame.image.load(f'{g.dataPath}/gui/bg_ingame.png')
         g.guiSurface.blit(self.background, (0, 0))
 
         # events
@@ -314,18 +309,29 @@ class GameGUI():
 
         # inventory boxes
         self.inventoryBoxes = []
-        for y in range(0, 3):
-            for x in range(0, 3):
-                self.inventoryBoxes.append(pygame.Rect((524 + x*(66+24) + 1, 90 + y*(66+24) + 1, 64, 64)))
+        for y in range(3):
+            self.inventoryBoxes.extend(
+                pygame.Rect(
+                    (524 + x * (66 + 24) + 1, 90 + y * (66 + 24) + 1, 64, 64)
+                )
+                for x in range(3)
+            )
 
-        self.emptySlotSurface = pygame.image.load(g.dataPath + '/gui/empty_slot.png').convert_alpha()
+        self.emptySlotSurface = pygame.image.load(
+            f'{g.dataPath}/gui/empty_slot.png'
+        ).convert_alpha()
+
 
         # spellbook boxes
         # inventory boxes
         self.spellbookBoxes = []
-        for y in range(0, 3):
-            for x in range(0, 3):
-                self.spellbookBoxes.append(pygame.Rect((524 + x*(66+24) + 1, 90 + y*(66+24) + 1, 64, 64)))
+        for y in range(3):
+            self.spellbookBoxes.extend(
+                pygame.Rect(
+                    (524 + x * (66 + 24) + 1, 90 + y * (66 + 24) + 1, 64, 64)
+                )
+                for x in range(3)
+            )
 
         # inventory tooltip
         self.tooltipRect = pygame.Rect((0, 0, 128, 64))
@@ -359,13 +365,19 @@ class GameGUI():
         spritesAmount = countFiles(g.dataPath + '/items/')
 
         for i in range(spritesAmount):
-            tempImage = pygame.image.load(g.dataPath + '/items/' + str(i) + '.png').convert_alpha()
+            tempImage = pygame.image.load(
+                f'{g.dataPath}/items/' + str(i) + '.png'
+            ).convert_alpha()
+
             self.itemSprites.append(tempImage)
 
         spritesAmount = countFiles(g.dataPath + '/spells/')
 
         for i in range(spritesAmount):
-            tempImage = pygame.image.load(g.dataPath + '/spells/' + str(i) + '.bmp').convert()
+            tempImage = pygame.image.load(
+                f'{g.dataPath}/spells/' + str(i) + '.bmp'
+            ).convert()
+
             self.spellSprites.append(tempImage)
 
     def setState(self, state):
@@ -396,10 +408,7 @@ class GameGUI():
         def pressed(key):
             keys = pygame.key.get_pressed()
 
-            if keys[key]:
-                return True
-            else:
-                return False
+            return bool(keys[key])
 
         self.app.event(event)
         #self.graphicsEngine.dirtyRects = self.app.update()
@@ -461,17 +470,17 @@ class GameGUI():
 
     def handleMouseTargetClick(self, button):
         # left click - target npc/player
-        if button == 1:
-            # make sure we are clicking inside the game
-            if g.gameSurface.get_rect().collidepoint((g.cursorX, g.cursorY)):
-                # calculate mouse tile pos
-                x = (g.cursorX-16) // PIC_X
-                y = (g.cursorY-16) // PIC_Y
+        if button == 1 and g.gameSurface.get_rect().collidepoint(
+            (g.cursorX, g.cursorY)
+        ):
+            # calculate mouse tile pos
+            x = (g.cursorX-16) // PIC_X
+            y = (g.cursorY-16) // PIC_Y
 
-                # find target
-                findTarget(x, y)
+            # find target
+            findTarget(x, y)
 
-                return
+            return
 
     def handleInventoryMouseClick(self, button, invNum):
         # right click - use inventory item
@@ -601,7 +610,10 @@ class GameGUI():
 
     def drawStatIcons(self):
         attributeStrength = pygame.image.load(g.dataPath + '/gui/attribute_strength.png').convert_alpha()
-        attributeDefense = pygame.image.load(g.dataPath + '/gui/attribute_defense.png').convert_alpha()
+        attributeDefense = pygame.image.load(
+            f'{g.dataPath}/gui/attribute_defense.png'
+        ).convert_alpha()
+
 
         # calculate positions
         strRect = attributeStrength.get_rect()
@@ -618,7 +630,10 @@ class GameGUI():
 
     def drawHealthBar(self):
         emptyBarSurface = pygame.image.load(g.dataPath + '/gui/bar_empty.png').convert_alpha()
-        redBarSurface = pygame.image.load(g.dataPath + '/gui/bar_red.png').convert_alpha()
+        redBarSurface = pygame.image.load(
+            f'{g.dataPath}/gui/bar_red.png'
+        ).convert_alpha()
+
 
         pos = (544, 75)
         healthBarWidth = 208*Player[g.myIndex].vitals[Vitals.hp]/Player[g.myIndex].maxHP
@@ -637,7 +652,10 @@ class GameGUI():
 
     def drawManaBar(self):
         emptyBarSurface = pygame.image.load(g.dataPath + '/gui/bar_empty.png').convert_alpha()
-        blueBarSurface = pygame.image.load(g.dataPath + '/gui/bar_blue.png').convert_alpha()
+        blueBarSurface = pygame.image.load(
+            f'{g.dataPath}/gui/bar_blue.png'
+        ).convert_alpha()
+
 
         pos = (544, 100)
         manaBarWidth = 208*Player[g.myIndex].vitals[Vitals.mp]/Player[g.myIndex].maxMP

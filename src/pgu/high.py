@@ -48,13 +48,11 @@ class _High:
         the score did not attain a position in the table.
 
         """
-        n = 0
-        for e in self._list:
+        for n, e in enumerate(self._list):
             if score > e.score:
                 self._list.insert(n,_Score(score,name,data))
-                self._list = self._list[0:self.limit]
+                self._list = self._list[:self.limit]
                 return n
-            n += 1
         if len(self._list) < self.limit:
             self._list.append(_Score(score,name,data))
             return len(self._list)-1
@@ -65,11 +63,9 @@ class _High:
         Return -- the position the score will attain, else None
 
         """
-        n = 0
-        for e in self._list:
+        for n, e in enumerate(self._list):
             if score > e.score:
                 return n
-            n += 1
         if len(self._list) < self.limit:
             return len(self._list)
         
@@ -107,25 +103,23 @@ class Highs:
         
         self._dict = {}
         try:
-            f = open(self.fname)
-            for line in f.readlines():
-                key,score,name,data = line.strip().split("\t")
-                if key not in self._dict:
-                    self._dict[key] = _High(self,self.limit)
-                high = self._dict[key]
-                high.submit(int(score),name,data)
-            f.close()
+            with open(self.fname) as f:
+                for line in f.readlines():
+                    key,score,name,data = line.strip().split("\t")
+                    if key not in self._dict:
+                        self._dict[key] = _High(self,self.limit)
+                    high = self._dict[key]
+                    high.submit(int(score),name,data)
         except:
             pass
     
     def save(self):
         """Save the high scores."""
         
-        f = open(self.fname,"w")
-        for key,high in self._dict.items():
-            for e in high:
-                f.write("%s\t%d\t%s\t%s\n"%(key,e.score,e.name,str(e.data)))
-        f.close()
+        with open(self.fname,"w") as f:
+            for key,high in self._dict.items():
+                for e in high:
+                    f.write("%s\t%d\t%s\t%s\n"%(key,e.score,e.name,str(e.data)))
         
     def __getitem__(self,key):
         if key not in self._dict:

@@ -153,62 +153,60 @@ class Container(widget.Widget):
     
     def event(self,e):
         used = False
-        
+
         if self.mywindow and e.type == MOUSEBUTTONDOWN:
             w = self.mywindow
-            if self.myfocus is w:
-                if not w.collidepoint(e.pos): self.blur(w)
-            if not self.myfocus:
-                if w.collidepoint(e.pos): self.focus(w)
-        
-        if not self.mywindow:
+            if self.myfocus is w and not w.collidepoint(e.pos):
+                self.blur(w)
+            if not self.myfocus and w.collidepoint(e.pos):
+                self.focus(w)
             #### by Gal Koren
             ##
             ## if e.type == FOCUS:
-            if e.type == FOCUS and not self.myfocus:
-                #self.first()
-                pass
-            elif e.type == EXIT:
-                if self.myhover: self.exit(self.myhover)
-            elif e.type == BLUR:
-                if self.myfocus: self.blur(self.myfocus)
-            elif e.type == MOUSEBUTTONDOWN:
+        if e.type == FOCUS and not self.myfocus:
+            pass
+        elif e.type == EXIT:
+            if not self.mywindow and self.myhover:
+                self.exit(self.myhover)
+        elif e.type == BLUR:
+            if not self.mywindow and self.myfocus:
+                self.blur(self.myfocus)
+        elif e.type == MOUSEBUTTONDOWN:
+            if not self.mywindow:
                 h = None
                 for w in self.widgets:
-                    if not w.disabled: 
-                        # Focusable not considered, since that is only for tabs
-                        if w.collidepoint(e.pos):
-                            h = w
-                            if self.myfocus is not w: self.focus(w)
+                    if not w.disabled and w.collidepoint(e.pos):
+                        h = w
+                        if self.myfocus is not h:
+                            self.focus(h)
                 if not h and self.myfocus:
                     self.blur(self.myfocus)
-            elif e.type == MOUSEMOTION:
+        elif e.type == MOUSEMOTION:
+            if not self.mywindow:
                 if 1 in e.buttons:
-                    if self.myfocus: ws = [self.myfocus]
-                    else: ws = []
+                    ws = [self.myfocus] if self.myfocus else []
                 else: ws = self.widgets
-                
+
                 h = None
                 for w in ws:
                     if w.collidepoint(e.pos):
                         h = w
-                        if self.myhover is not w: 
-                            self.enter(w)
+                        if self.myhover is not h: 
+                            self.enter(h)
                         break
                 if not h and self.myhover:
                     self.exit(self.myhover)
                 w = self.myhover
-                
+
                 if w and w is not self.myfocus:
                     sub = pygame.event.Event(e.type,{
                         'buttons':e.buttons,
                         'pos':(e.pos[0]-w.rect.x,e.pos[1]-w.rect.y),
                         'rel':e.rel})
                     used = w._event(sub)
-        
-        w = self.myfocus
-        if w:
-            if e.type == MOUSEBUTTONUP or e.type == MOUSEBUTTONDOWN:
+
+        if w := self.myfocus:
+            if e.type in [MOUSEBUTTONUP, MOUSEBUTTONDOWN]:
                 sub = pygame.event.Event(e.type,{
                     'button':e.button,
                     'pos':(e.pos[0]-w.rect.x,e.pos[1]-w.rect.y)})
@@ -221,7 +219,7 @@ class Container(widget.Widget):
                     'buttons':e.buttons,
                     'pos':(e.pos[0]-w.rect.x,e.pos[1]-w.rect.y),
                     'rel':e.rel})
-            elif (e.type == KEYDOWN or e.type == KEYUP):
+            elif e.type in [KEYDOWN, KEYUP]:
                 sub = e
             else:
                 sub = None
@@ -380,8 +378,7 @@ class Container(widget.Widget):
     
     
     def _next(self,orig=None):
-        start = 0
-        if orig in self.widgets: start = self.widgets.index(orig)+1
+        start = self.widgets.index(orig)+1 if orig in self.widgets else 0
         for w in self.widgets[start:]:
             if not w.disabled and w.focusable:
                 if isinstance(w,Container):
@@ -393,8 +390,7 @@ class Container(widget.Widget):
         return False
     
     def _previous(self,orig=None):
-        end = len(self.widgets)
-        if orig in self.widgets: end = self.widgets.index(orig)
+        end = self.widgets.index(orig) if orig in self.widgets else len(self.widgets)
         ws = self.widgets[:end]
         ws.reverse()
         for w in ws:
@@ -443,7 +439,7 @@ class Container(widget.Widget):
             if (w.name == name):
                 return w
             elif (isinstance(w, Container)):
-                tmp = w.find(name)
-                if (tmp): return tmp
+                if tmp := w.find(name):
+                    return tmp
         return None
 

@@ -13,15 +13,11 @@ def log(msg):
 
 def decodeJSON(data):
     '''Decodes JSON from a @data'''
-    result = json.loads(data)
-
-    return result
+    return json.loads(data)
 
 def countFiles(folder):
     """ Counts the number of files in a directory """
-    count = 0
-    for f in os.listdir(folder):
-        if os.path.isfile(os.path.join(folder, f)):
-            count += 1
-
-    return count
+    return sum(
+        bool(os.path.isfile(os.path.join(folder, f)))
+        for f in os.listdir(folder)
+    )

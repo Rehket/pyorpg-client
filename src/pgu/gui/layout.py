@@ -37,7 +37,7 @@ class Layout:
         for e in self._widgets:
             if type(e) is tuple and e[0] != 0:
                 self.do_space(e)
-            elif type(e) is tuple and e[0] == 0:
+            elif type(e) is tuple:
                 self.do_br(e[1])
             elif type(e) is int:
                 self.do_block(align=e)
@@ -142,28 +142,24 @@ class Layout:
         x2 = self.getright()
         align = self.align
         y = self.y
-        
+
         if len(self.items) != 0 and type(self.items[-1]) == tuple:
             del self.items[-1]
-        
-        w = 0
-        for e in self.items:
-            if type(e) == tuple: w += e[0]
-            else: w += e.rect.w
-            
+
+        w = sum(e[0] if type(e) == tuple else e.rect.w for e in self.items)
         if align == -1: x = x1
         elif align == 0: 
             x = x1 + ((x2-x1)-w)/2
             self.fit = 0
         elif align == 1: x = x2 - w
-            
+
         for e in self.items:
             if type(e) == tuple: x += e[0]
             else:
                 e.rect.x,e.rect.y = x,y
                 self.widgets.append(e)
                 x += e.rect.w
-        
+
         self.items = []
         self.y = self.y + self.h
         self.x = self.getleft()

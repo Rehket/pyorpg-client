@@ -56,18 +56,18 @@ class TileFont:
         size = self.size(text)
         scale = self.scale
         tw,th = self._size
-        if background == None:
+        if background is None:
             s = pygame.Surface(size).convert_alpha()
             s.fill((0,0,0,0))
         else:
             s = pygame.Surface(size).convert()
             s.fill(background)
-            
+
         if not self.sensitive: text = text.lower()
-        
+
         if color not in self.colors: self.colors[color] = {}
         colored = self.colors[color]
-        
+
         x,y = 0,0
         for c in text:
             if c in self.chars:
@@ -107,17 +107,17 @@ class BorderFont:
         
     def render(self,text,antialias=0,color=(255,255,255),background=None):
         size = self.size(text)
-        
-        if background == None:
+
+        if background is None:
             s = pygame.Surface(size).convert_alpha()
             s.fill((0,0,0,0))
         else:
             s = pygame.Surface(size).convert()
             s.fill(background)
-            
+
         bg = self.font.render(text,antialias,self.color)
         fg = self.font.render(text,antialias,color)
-        
+
         si = self._size
         dirs = [(-1,-1),(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0),(1,1)]
         for dx,dy in dirs: s.blit(bg,(si+dx*si,si+dy*si))

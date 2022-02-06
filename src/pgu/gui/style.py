@@ -21,7 +21,8 @@ class Style:
     def check(self, attr):
         if (not self.exists(attr)):
             desc = self.obj.cls
-            if (self.obj.pcls): desc += "."+self.obj.pcls
+            if self.obj.pcls:
+                desc += f'.{self.obj.pcls}'
             raise StyleError("Cannot find the style attribute '%s' for '%s'" % (attr, desc))
 
     # Checks if the given style attribute exists

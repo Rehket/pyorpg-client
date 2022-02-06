@@ -41,10 +41,7 @@ class Table(container.Container):
         return len(self._rows)
     
     def getColumns(self):
-        if self._rows:
-            return len(self._rows[0])
-        else:
-            return 0
+        return len(self._rows[0]) if self._rows else 0
     
     def remove_row(self, n): #NOTE: won't work in all cases.
         if n >= self.getRows():
@@ -81,7 +78,7 @@ class Table(container.Container):
         #print 'clear',self,self._rows
     
     def _addRow(self):
-        self._rows.append([None for x in range(self.getColumns())])
+        self._rows.append([None for _ in range(self.getColumns())])
     
     def tr(self):
         """Start on the next row."""
@@ -298,7 +295,7 @@ class _Table_td(container.Container):
     
     def resize(self,width=None,height=None):
         w = self.widget
-        
+
         #expansion code, but i didn't like the idea that much..
         #a bit obscure, fairly useless when a user can just
         #add a widget to a table instead of td it in.
@@ -308,34 +305,33 @@ class _Table_td(container.Container):
         #if self.hexpand and width != None: ww = max(ww,width)
         #if self.vexpand and height != None: hh = max(hh,height)
         #w.rect.w,w.rect.h = w.resize(ww,hh)
-        
+
         #why bother, just do the lower mentioned item...
         w.rect.w,w.rect.h = w.resize()
-        
+
         #this should not be needed, widgets should obey their sizing on their own.
-        
 #         if (self.style.width!=0 and w.rect.w > self.style.width) or (self.style.height!=0 and w.rect.h > self.style.height):
 #             ww,hh = None,None
 #             if self.style.width: ww = self.style.width
 #             if self.style.height: hh = self.style.height
 #             w.rect.w,w.rect.h = w.resize(ww,hh)
-      
-  
+
+
         #in the case that the widget is too big, we try to resize it
         if (width != None and width < w.rect.w) or (height != None and height < w.rect.h):
             (w.rect.w, w.rect.h) = w.resize(width, height)
 
         # In python3 max and min no longer accept None as an argument
-        if (width == None): width = -sys.maxsize
-        if (height == None): height = -sys.maxsize
-        
+        if width is None: width = -sys.maxsize
+        if height is None: height = -sys.maxsize
+
         width = max(width, w.rect.w, self.style.width) #,self.style.cell_width)
         height = max(height, w.rect.h, self.style.height) #,self.style.cell_height)
-        
+
         dx = width-w.rect.w
         dy = height-w.rect.h
         w.rect.x = (self.style.align+1)*dx/2
         w.rect.y = (self.style.valign+1)*dy/2
-        
+
         return width,height
 

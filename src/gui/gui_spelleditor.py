@@ -339,7 +339,11 @@ class SpellEditorGUI():
         # scroll buttons
         # - scroll buttons (place them near self.selectedSpriteRect)
         btnScrollLeft = pygUI.pygButton((600, 88, 32, 32), normal=g.dataPath + '/themes/default/hslider.left.tga')
-        btnScrollRight = pygUI.pygButton((680, 88, 32, 32), normal=g.dataPath + '/themes/default/hslider.right.tga')
+        btnScrollRight = pygUI.pygButton(
+            (680, 88, 32, 32),
+            normal=f'{g.dataPath}/themes/default/hslider.right.tga',
+        )
+
 
         self.scrollButtons = (btnScrollLeft, btnScrollRight)
 

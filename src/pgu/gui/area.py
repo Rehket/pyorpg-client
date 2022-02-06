@@ -104,9 +104,7 @@ class SlideBox(container.Container):
                                                     rect=self.max_rect,
                                                     real_surface=s,
                                                     offset=self.offset))
-        result = []
-        for r in rects: result.append(pygame.Rect(r).move(self.offset))
-        return result
+        return [pygame.Rect(r).move(self.offset) for r in rects]
         
     def resize(self, width=None, height=None):
         container.Container.resize(self)
@@ -153,12 +151,12 @@ class ScrollArea(table.Table):
         w= widget
         params.setdefault('cls', 'scrollarea')
         table.Table.__init__(self, width=width,height=height,**params)
-        
-        self.sbox = SlideBox(w, width=width, height=height, cls=self.cls+".content")
+
+        self.sbox = SlideBox(w, width=width, height=height, cls=f'{self.cls}.content')
         self.widget = w
         self.vscrollbar = vscrollbar
         self.hscrollbar = hscrollbar
-        
+
         self.step = step
 
     @property
@@ -173,14 +171,14 @@ class ScrollArea(table.Table):
     def resize(self,width=None,height=None):
         widget = self.widget
         box = self.sbox
-        
+
         #self.clear()
         table.Table.clear(self)
         #print 'resize',self,self._rows
-        
+
         self.tr()
         self.td(box)
-        
+
         widget.rect.w, widget.rect.h = widget.resize()
         my_width,my_height = self.style.width,self.style.height
         if not my_width:
@@ -189,19 +187,18 @@ class ScrollArea(table.Table):
         if not my_height:
             my_height = widget.rect.h
             self.vscrollbar = False
-        
+
         box.style.width,box.style.height = my_width,my_height #self.style.width,self.style.height
-        
+
         box.rect.w,box.rect.h = box.resize()
-        
+
         #print widget.rect
         #print box.rect
         #r = table.Table.resize(self,width,height)
         #print r
         #return r
-        
+
         #print box.offset
-        
 #         #this old code automatically adds in a scrollbar if needed
 #         #but it doesn't always work
 #         self.vscrollbar = None
@@ -227,13 +224,13 @@ class ScrollArea(table.Table):
 #             box.style.height = self.style.height - hs.rect.h
 
         xt,xr,xb,xl  = pguglobals.app.theme.getspacing(box)
-        
+
 
         if self.vscrollbar:
             self.vscrollbar = slider.VScrollBar(box.offset[1],0, 65535, 0,step=self.step) 
             self.td(self.vscrollbar)
             self.vscrollbar.connect(CHANGE, self._vscrollbar_changed, None)
-            
+
             vs = self.vscrollbar
             vs.rect.w,vs.rect.h = vs.resize()
             if self.style.width:
@@ -244,12 +241,12 @@ class ScrollArea(table.Table):
             self.hscrollbar.connect(CHANGE, self._hscrollbar_changed, None)
             self.tr()
             self.td(self.hscrollbar)
-            
+
             hs = self.hscrollbar
             hs.rect.w,hs.rect.h = hs.resize()
             if self.style.height:
                 box.style.height = self.style.height - (hs.rect.h + xt + xb)
-            
+
         if self.hscrollbar:
             hs = self.hscrollbar
             hs.min = 0
@@ -258,7 +255,7 @@ class ScrollArea(table.Table):
             hs.size = hs.style.width * box.style.width / max(1,widget.rect.w)
         else:
             box.offset[0] = 0
-            
+
         if self.vscrollbar:
             vs = self.vscrollbar
             vs.min = 0
@@ -267,11 +264,8 @@ class ScrollArea(table.Table):
             vs.size = vs.style.height * box.style.height / max(1,widget.rect.h)
         else:
             box.offset[1] = 0
-            
-        #print self.style.width,box.style.width, hs.style.width
-            
-        r = table.Table.resize(self,width,height)
-        return r
+
+        return table.Table.resize(self,width,height)
     
     def x_resize(self, width=None, height=None):
         w,h = table.Table.resize(self, width, height)
@@ -344,9 +338,9 @@ class _List_Item(button._button):
         self.group = None
         self.value = value #(self, value)
         self.widget = None
-        
+
         if type(label) == str: 
-            label = basic.Label(label, cls=self.cls+".label")
+            label = basic.Label(label, cls=f'{self.cls}.label')
 
         if image and label:
             self.widget = container.Container()
@@ -356,7 +350,7 @@ class _List_Item(button._button):
             self.widget.add(label, image.rect.w, 0)
         elif image: self.widget = image
         elif label: self.widget = label
-        
+
         self.pcls = ""
     
     def resize(self,width=None,height=None):

@@ -53,14 +53,14 @@ class PlayerClass():
         self.pk = 0
 
         # stats
-        self.stats = [None for i in range(Stats.stat_count)]
+        self.stats = [None for _ in range(Stats.stat_count)]
         self.statsPoints = None
 
         # vitals (hp, mp etc.)
-        self.vitals = [None for i in range(Vitals.vital_count)]
+        self.vitals = [None for _ in range(Vitals.vital_count)]
 
         # equipment
-        self.equipment = [None for i in range(Equipment.equipment_count)]
+        self.equipment = [None for _ in range(Equipment.equipment_count)]
 
         # Position
         self.Map = None     # None
@@ -80,7 +80,7 @@ class PlayerClass():
         self.mapGetTimer = 0
         self.castedSpell = 0
 
-        self.spellAnimations = [SpellAnimClass() for i in range(MAX_SPELLANIM)]
+        self.spellAnimations = [SpellAnimClass() for _ in range(MAX_SPELLANIM)]
 
 class ClassClass():
     def __init__(self):
@@ -89,7 +89,7 @@ class ClassClass():
         self.stat = [None for i in range(Stats.stat_count)]
 
         # for client use
-        self.vital = [None for i in range(Vitals.vital_count)]
+        self.vital = [None for _ in range(Vitals.vital_count)]
 
 
 class TileClass():
@@ -141,7 +141,7 @@ class MapClass():
         self.bootY = 0
 
         self.tile = [[TileClass() for i in range(MAX_MAPY)] for i in range(MAX_MAPX)]
-        self.npc = [None for i in range(MAX_MAP_NPCS)]
+        self.npc = [None for _ in range(MAX_MAP_NPCS)]
 
 class MapItemClass():
     def __init__(self):
@@ -189,14 +189,14 @@ class NPCClass():
         self.dropItem = 0
         self.dropItemValue = 0
 
-        self.stat = [None for i in range(Stats.stat_count)]
+        self.stat = [None for _ in range(Stats.stat_count)]
 
 class MapNPCClass():
     def __init__(self):
         self.num = None
         self.target = None
 
-        self.vital = [None for i in range(Vitals.vital_count)]
+        self.vital = [None for _ in range(Vitals.vital_count)]
 
         self.map = None
         self.x = None
@@ -210,7 +210,7 @@ class MapNPCClass():
         self.attacking = False
         self.attackTimer = 0
 
-        self.spellAnimations = [SpellAnimClass() for i in range(MAX_SPELLANIM)]
+        self.spellAnimations = [SpellAnimClass() for _ in range(MAX_SPELLANIM)]
 
 class TradeItemClass():
     def __init__(self):
@@ -226,24 +226,27 @@ class ShopClass():
         self.joinSay = ''
         self.leaveSay = ''
         self.fixesItems = False
-        self.tradeItem = [TradeItemClass() for i in range(MAX_TRADES)]
+        self.tradeItem = [TradeItemClass() for _ in range(MAX_TRADES)]
 
 
 
 # Data initializations
 Map = MapClass()
-MapTilePosition = [[TilePosClass() for i in range(MAX_MAPY)] for i in range(MAX_MAPX)]
+MapTilePosition = [
+    [TilePosClass() for _ in range(MAX_MAPY)] for _ in range(MAX_MAPX)
+]
+
 TempTile = [[TempTileClass() for i in range(MAX_MAPY)] for i in range(MAX_MAPX)]
 
-Player = [PlayerClass() for i in range(MAX_PLAYERS)]
+Player = [PlayerClass() for _ in range(MAX_PLAYERS)]
 PlayerInv = [PlayerInvClass() for i in range(MAX_INV)]
 PlayerSpells = [None for i in range(MAX_PLAYER_SPELLS)]
 
 #todo: dont use a fixed size, please
-Class = [ClassClass() for i in range(99)]
-Item = [ItemClass() for i in range(MAX_ITEMS)]
-Spell = [SpellClass() for i in range(MAX_SPELLS)]
-NPC = [NPCClass() for i in range(MAX_NPCS)]
-MapItem = [MapItemClass() for i in range(MAX_MAP_ITEMS)]
-mapNPC = [MapNPCClass() for i in range(MAX_MAP_NPCS)]
-Shop = [ShopClass() for i in range(MAX_SHOPS)]
+Class = [ClassClass() for _ in range(99)]
+Item = [ItemClass() for _ in range(MAX_ITEMS)]
+Spell = [SpellClass() for _ in range(MAX_SPELLS)]
+NPC = [NPCClass() for _ in range(MAX_NPCS)]
+MapItem = [MapItemClass() for _ in range(MAX_MAP_ITEMS)]
+mapNPC = [MapNPCClass() for _ in range(MAX_MAP_NPCS)]
+Shop = [ShopClass() for _ in range(MAX_SHOPS)]

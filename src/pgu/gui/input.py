@@ -43,18 +43,18 @@ class Input(widget.Widget):
     
     def paint(self,s):
         r = pygame.Rect(0,0,self.rect.w,self.rect.h)
-        
+
         cs = 2 #NOTE: should be in a style
-        
-        w,h = self.font.size(self.value[0:self.pos])
+
+        w,h = self.font.size(self.value[:self.pos])
         x = w-self.vpos
         if x < 0: self.vpos -= -x
         if x+cs > s.get_width(): self.vpos += x+cs-s.get_width()
-        
+
         s.blit(self.font.render(self.value, 1, self.style.color),(-self.vpos,0))
-        
+
         if self.container.myfocus is self:
-            w,h = self.font.size(self.value[0:self.pos])
+            w,h = self.font.size(self.value[:self.pos])
             r.x = w-self.vpos
             r.w = cs
             r.h = h
@@ -88,31 +88,21 @@ class Input(widget.Widget):
             elif e.key == K_RETURN:
                 self.send(ACTIVATE)
                 self.blur()
-            elif e.key == K_TAB:
-                pass
-            else:
+            elif e.key != K_TAB:
                 #c = str(e.unicode)
-                if (type(e.unicode) == str):
-                    c = e.unicode
-                else:
-                    c = (e.unicode).encode('latin-1')
-
+                c = e.unicode if (type(e.unicode) == str) else (e.unicode).encode('latin-1')
                 try:
-                    if c:
-                        if len(self.value) <= self.maxlength:
-                            self._setvalue(self.value[:self.pos] + c + self.value[self.pos:])
-                            self.pos += 1
+                    if c and len(self.value) <= self.maxlength:
+                        self._setvalue(self.value[:self.pos] + c + self.value[self.pos:])
+                        self.pos += 1
                 except: #ignore weird characters
                     pass
             self.repaint()
-        elif e.type == FOCUS:
+        elif e.type in [FOCUS, BLUR]:
             self.repaint()
-        elif e.type == BLUR:
-            self.repaint()
-        
         self.pcls = ""
         if self.container.myfocus is self: self.pcls = "focus"
-        
+
         return used
     
     @property
@@ -121,7 +111,7 @@ class Input(widget.Widget):
 
     @value.setter
     def value(self, val):
-        if (val == None): 
+        if val is None: 
             val = ""
         val = str(val)
         self.pos = len(val)
@@ -138,25 +128,25 @@ class Password(Input):
     def paint(self,s):
         hidden="*"
         show=len(self.value)*hidden
-        
+
         #print "self.value:",self.value
 
-        if self.pos == None: self.pos = len(self.value)
-        
+        if self.pos is None: self.pos = len(self.value)
+
         r = pygame.Rect(0,0,self.rect.w,self.rect.h)
-        
+
         cs = 2 #NOTE: should be in a style
-        
+
         w,h = self.font.size(show)
         x = w-self.vpos
         if x < 0: self.vpos -= -x
         if x+cs > s.get_width(): self.vpos += x+cs-s.get_width()
-        
+
         s.blit(self.font.render(show, 1, self.style.color),(-self.vpos,0))
-        
+
         if self.container.myfocus is self:
-            #w,h = self.font.size(self.value[0:self.pos])            
-            w,h = self.font.size(show[0:self.pos])
+            #w,h = self.font.size(self.value[0:self.pos])
+            w,h = self.font.size(show[:self.pos])
             r.x = w-self.vpos
             r.w = cs
             r.h = h
